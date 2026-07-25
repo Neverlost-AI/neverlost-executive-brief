@@ -17,17 +17,17 @@ export const entryInputSchema = z.object({
 });
 
 export const entryUpdateSchema = entryInputSchema.partial().extend({
-  reviewed_at: z.iso.datetime().nullable().optional(),
-  archived_at: z.iso.datetime().nullable().optional(),
+  reviewed_at: z.iso.datetime({ offset: true }).nullable().optional(),
+  archived_at: z.iso.datetime({ offset: true }).nullable().optional(),
 });
 
 export const entrySchema = entryInputSchema.extend({
   id: z.uuid(),
   user_id: z.uuid(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
-  reviewed_at: z.iso.datetime().nullable(),
-  archived_at: z.iso.datetime().nullable(),
+  created_at: z.iso.datetime({ offset: true }),
+  updated_at: z.iso.datetime({ offset: true }),
+  reviewed_at: z.iso.datetime({ offset: true }).nullable(),
+  archived_at: z.iso.datetime({ offset: true }).nullable(),
 });
 
 export type EntryInput = z.infer<typeof entryInputSchema>;

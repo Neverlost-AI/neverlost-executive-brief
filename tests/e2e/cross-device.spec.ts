@@ -13,6 +13,10 @@ test.describe("manual cross-device acceptance", () => {
     await page.getByLabel("Email").fill(email!);
     await page.getByLabel("Password").fill(password!);
     await page.getByRole("button", { name: "Sign in securely" }).click();
+    for (const label of ["Email", "Password"]) {
+      const field = page.getByLabel(label);
+      if (await field.count()) await field.fill("");
+    }
     await expect(page.getByRole("heading", { name: "Executive Brief" })).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });

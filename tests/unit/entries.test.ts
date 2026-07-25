@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   entryInputSchema,
+  entrySchema,
   entryUpdateSchema,
   sortActiveEntries,
   type Entry,
@@ -50,6 +51,16 @@ describe("entry validation", () => {
   it("accepts explicit review and archive state transitions", () => {
     expect(entryUpdateSchema.safeParse({ reviewed_at: new Date().toISOString() }).success).toBe(true);
     expect(entryUpdateSchema.safeParse({ reviewed_at: null, archived_at: null }).success).toBe(true);
+  });
+
+  it("accepts PostgreSQL timestamps with explicit UTC offsets", () => {
+    expect(
+      entrySchema.safeParse({
+        ...base,
+        created_at: "2026-07-25T07:15:30.123456+00:00",
+        updated_at: "2026-07-25T07:15:30.123456+00:00",
+      }).success,
+    ).toBe(true);
   });
 });
 

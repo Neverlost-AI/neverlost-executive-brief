@@ -30,7 +30,8 @@ The site starter uses Vinext to produce the Cloudflare Worker-compatible build r
    `supabase/migrations/202607240001_create_entries.sql`
 3. Create a dedicated email/password test user.
 4. Copy `.env.example` to `.env.local`.
-5. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+5. Set `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 6. For Playwright, set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD`.
 
 Never add a service-role key. The public anon key is intentionally restricted by RLS.
@@ -61,7 +62,8 @@ To run the database ownership test, execute `supabase/tests/entries_rls.sql` aga
 ## Deployment
 
 1. Apply the migration to the target Supabase project.
-2. Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` as hosted runtime variables.
+2. Configure `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as hosted runtime variables.
 3. Build the validated source.
 4. Deploy privately for review.
 5. Run `MANUAL_ACCEPTANCE_CHECKLIST.md` against the deployed URL.
