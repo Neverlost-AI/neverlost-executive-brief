@@ -10,6 +10,8 @@ Phase 0 governance documents and the Phase 1 application source are complete. Th
 
 The review Supabase project is connected and migrated. Public self-registration is disabled, the approved account authenticates, the authenticated cross-device Playwright lifecycle passes, and the live two-user RLS isolation test passes with full rollback.
 
+The owner completed real-device acceptance against the protected private Vercel preview. An entry created on an actual phone remained synchronized while it was viewed, edited, reviewed, archived, restored, and deleted from an actual computer.
+
 The implementation contains no AI, automatic brief generation, external integration, monitoring, notification, scheduler, browser extension, Windows automation, or Phase 2 work.
 
 ## Implemented
@@ -44,6 +46,8 @@ The implementation contains no AI, automatic brief generation, external integrat
 | Supabase table and RLS catalog verification | Passed |
 | Supabase transactional RLS isolation test | Passed; rollback confirmed; zero test records retained |
 | Public self-registration check | Disabled and independently verified |
+| Private Vercel preview | Ready; protected by Vercel authentication |
+| Real-device phone-to-computer lifecycle | Passed; owner-confirmed cross-device synchronization |
 
 The authenticated lifecycle test covers sign-in, phone-sized creation, desktop visibility, edit, review, persistence after reload, restore to unreviewed, archive, archive visibility, restore, delete confirmation, and deletion. The test deletes its lifecycle entry on success.
 
@@ -69,9 +73,20 @@ See `SECURITY_REVIEW.md` for the full review.
 
 ## Acceptance decision
 
-Automated hosted acceptance passed. Overall acceptance is intentionally **not complete** because the owner has not yet tested the deployed application from an actual phone and computer.
+Automated hosted acceptance passed. Real-device Phase 1 acceptance also passed on 2026-07-25 based on the owner's completed phone-to-computer lifecycle:
 
-No application deployment was performed. After a private review deployment exists, complete `MANUAL_ACCEPTANCE_CHECKLIST.md` on the real devices before making any broader readiness claim.
+- Created an entry on an actual phone.
+- Viewed and edited the same entry on an actual computer.
+- Confirmed reviewed-state persistence.
+- Archived and restored the entry.
+- Deleted the entry.
+- Confirmed cross-device state remained synchronized throughout.
+
+The private preview was deployed from the verified local checkout with the Vercel CLI. Vercel Deployment Protection remains active, the private GitHub organization repository was not connected to Vercel, and no production deployment was created.
+
+This completes the Phase 1 acceptance gate for the bounded manual cross-device MVP. It does **not** authorize a production deployment, Phase 2 work, AI functionality, integrations, analytics, or any expansion of scope.
+
+See `PHASE_1_ACCEPTANCE_CHECKPOINT.md` for the durable acceptance record.
 
 ## Exact verification commands
 
@@ -157,6 +172,6 @@ pnpm build
 
 ## Final release statement
 
-The source is ready for configured review, not production. The maximum and current status remains:
+Phase 1 acceptance is complete for the private, personal, noncommercial validation scope. The source is not authorized for production deployment or Phase 2 work. The maximum and current status remains:
 
 `PHASE_1_MANUAL_CROSS_DEVICE_MVP_REVIEW_ONLY`
