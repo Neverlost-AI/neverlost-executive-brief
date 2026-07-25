@@ -1,6 +1,6 @@
 # Neverlost Executive Brief
 
-Status: `PHASE_1_MANUAL_CROSS_DEVICE_MVP_REVIEW_ONLY`
+Status: `PHASE_1_MANUAL_CROSS_DEVICE_MVP_HUMAN_ACCEPTED`
 
 A private, manual cross-device inbox for continuity items. Capture an item on a phone, then review, edit, archive, restore, or delete it from a computer using the same Supabase-authenticated account.
 
@@ -88,7 +88,7 @@ See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
 - Password recovery, MFA, rate-limit tuning, backups, retention, and incident response are configured in Supabase rather than this MVP.
 - Delete is permanent and has no in-product recovery.
 - Offline capture, notifications, native apps, collaboration, sharing, organizations, and integrations are not included.
-- The product is review-only and is not production-ready.
+- Phase 1 human acceptance passed using the protected private preview. No production deployment exists, the app is not production-ready, Phase 2 has not started, and public launch or commercial readiness is not approved.
 
 ## Project documents
 

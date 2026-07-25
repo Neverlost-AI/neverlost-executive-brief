@@ -2,7 +2,7 @@
 
 Checkpoint date: 2026-07-25
 
-Status: `PHASE_1_MANUAL_CROSS_DEVICE_MVP_REVIEW_ONLY`
+Status: `PHASE_1_MANUAL_CROSS_DEVICE_MVP_HUMAN_ACCEPTED`
 
 ## Accepted baseline
 
@@ -37,13 +37,14 @@ On 2026-07-25, the owner reported successful real-device acceptance:
 
 Phase 1 acceptance passed for the bounded manual cross-device MVP and its private, personal, noncommercial validation scope.
 
-This checkpoint confirms the accepted Phase 1 behavior. It does not change the review-only status and does not authorize:
+This checkpoint confirms the accepted Phase 1 behavior and updates the current project status to `PHASE_1_MANUAL_CROSS_DEVICE_MVP_HUMAN_ACCEPTED`. Acceptance used the protected private preview. The app is not production-ready, Phase 2 has not started, and this status does not authorize:
 
 - Production deployment or promotion of the Vercel preview.
 - Phase 2 implementation.
 - AI features or automatic brief generation.
 - New integrations, analytics, monitoring, notifications, or schedulers.
 - A custom domain, public repository, repository transfer, or paid-plan change.
+- Public launch or commercial readiness.
 - Any expansion of application scope.
 
 Further work requires explicit owner authorization.
