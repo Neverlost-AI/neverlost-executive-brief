@@ -710,7 +710,14 @@ function Brand() {
   return (
     <div className="brand">
       <span className="brand-mark">
-        <Image src="/favicon.svg" width={42} height={42} alt="NVLT logo" priority />
+        <Image
+          src="/brand/nvlt-primary.svg"
+          width={42}
+          height={42}
+          alt="NVLT logo"
+          priority
+          unoptimized
+        />
       </span>
       <div>
         <strong>NVLT Command Center</strong>
