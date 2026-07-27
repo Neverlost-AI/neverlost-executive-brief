@@ -1,18 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #17231f;
-  --muted: #65716c;
-  --line: #dfe5e1;
-  --paper: #fbfaf6;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --line: #d1d5db;
+  --paper: #f3f4f6;
   --panel: #ffffff;
-  --green: #234b3d;
-  --green-2: #356c58;
-  --mint: #e8f0eb;
-  --amber: #c78938;
-  --amber-soft: #fff5e5;
-  --danger: #a6413d;
-  --shadow: 0 18px 45px rgba(28, 47, 39, 0.08);
+  --primary: #374151;
+  --primary-dark: #1f2937;
+  --surface: #f3f4f6;
+  --white: #ffffff;
+  --shadow: 0 18px 45px rgba(31, 41, 55, 0.1);
 }
 
 * {
@@ -27,7 +25,7 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(210, 225, 216, 0.55), transparent 34rem),
+    radial-gradient(circle at top left, rgba(209, 213, 219, 0.62), transparent 34rem),
     var(--paper);
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
@@ -51,13 +49,13 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #d49a4b;
+  outline: 3px solid var(--primary);
   outline-offset: 3px;
 }
 
 .skip-link {
-  background: var(--ink);
-  color: white;
+  background: var(--primary-dark);
+  color: var(--white);
   left: 1rem;
   padding: 0.65rem 1rem;
   position: absolute;
@@ -75,7 +73,7 @@ a {
 
 .app-header {
   align-items: center;
-  background: rgba(251, 250, 246, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid var(--line);
   display: grid;
   gap: 1.5rem;
@@ -92,16 +90,19 @@ a {
 
 .brand-mark {
   align-items: center;
-  background: var(--green);
+  background: var(--white);
+  border: 1px solid var(--line);
   border-radius: 12px;
-  color: #fff9ed;
   display: inline-flex;
-  font-family: Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 700;
   height: 42px;
   justify-content: center;
   width: 42px;
+}
+
+.brand-mark img {
+  display: block;
+  height: 30px;
+  width: 30px;
 }
 
 .brand div {
@@ -110,8 +111,8 @@ a {
 }
 
 .brand strong {
-  font-family: Georgia, serif;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
 }
 
 .brand span:last-child {
@@ -135,7 +136,12 @@ a {
 }
 
 .app-header nav a:hover {
-  background: var(--mint);
+  background: var(--surface);
+}
+
+.app-header nav a[aria-current="page"] {
+  background: var(--primary);
+  color: var(--white);
 }
 
 .account {
@@ -170,7 +176,7 @@ a {
 }
 
 .eyebrow {
-  color: var(--green-2);
+  color: var(--primary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -225,18 +231,18 @@ h3 {
 }
 
 .button-primary {
-  background: var(--green);
-  color: white;
+  background: var(--primary);
+  color: var(--white);
 }
 
 .button-primary:hover {
-  background: #17392e;
+  background: var(--primary-dark);
 }
 
 .button-secondary {
-  background: var(--mint);
-  border-color: #cddbd3;
-  color: var(--green);
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--primary-dark);
 }
 
 .button-quiet {
@@ -246,9 +252,9 @@ h3 {
 }
 
 .button-danger {
-  background: #fff3f2;
-  border-color: #ebc9c6;
-  color: var(--danger);
+  background: var(--white);
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .summary-grid {
@@ -279,15 +285,15 @@ h3 {
 }
 
 .summary-amber {
-  background: var(--amber-soft);
+  background: var(--surface);
 }
 
 .summary-green {
-  background: var(--mint);
+  background: var(--white);
 }
 
 .summary-slate {
-  background: #f1f3f2;
+  background: var(--line);
 }
 
 .entry-section {
@@ -310,9 +316,9 @@ h3 {
 
 .section-heading span {
   align-items: center;
-  background: var(--mint);
+  background: var(--surface);
   border-radius: 999px;
-  color: var(--green);
+  color: var(--primary-dark);
   display: inline-flex;
   font-size: 0.75rem;
   font-weight: 800;
@@ -330,22 +336,22 @@ h3 {
 .entry-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-left: 4px solid #97a49e;
+  border-left: 4px solid var(--muted);
   border-radius: 14px;
-  box-shadow: 0 5px 20px rgba(28, 47, 39, 0.04);
+  box-shadow: 0 5px 20px rgba(31, 41, 55, 0.05);
   padding: 1.35rem;
 }
 
 .entry-card.priority-high {
-  border-left-color: var(--amber);
+  border-left-color: var(--primary-dark);
 }
 
 .entry-card.priority-low {
-  border-left-color: #adc5bb;
+  border-left-color: var(--line);
 }
 
 .entry-card-archived {
-  border-left-color: #9ba29f;
+  border-left-color: var(--muted);
   opacity: 0.92;
 }
 
@@ -385,15 +391,16 @@ h3 {
 }
 
 .entry-card p {
-  color: #4f5d57;
+  color: var(--primary);
   line-height: 1.55;
   min-height: 3.1rem;
 }
 
 .badge {
-  background: #eef1ef;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  color: #50605a;
+  color: var(--primary);
   display: inline-block;
   font-size: 0.67rem;
   font-weight: 800;
@@ -403,21 +410,22 @@ h3 {
 }
 
 .badge-high {
-  background: var(--amber-soft);
-  color: #925d18;
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: var(--white);
 }
 
 .badge-normal {
-  background: var(--mint);
-  color: var(--green);
+  background: var(--line);
+  color: var(--primary-dark);
 }
 
 .badge-low {
-  color: #62736c;
+  color: var(--muted);
 }
 
 .text-link {
-  color: var(--green);
+  color: var(--primary-dark);
   font-weight: 800;
   text-decoration: none;
 }
@@ -469,8 +477,8 @@ h3 {
 .field input,
 .field textarea,
 .field select {
-  background: #fff;
-  border: 1px solid #cbd4cf;
+  background: var(--white);
+  border: 1px solid var(--line);
   border-radius: 10px;
   color: var(--ink);
   min-height: 46px;
@@ -488,11 +496,12 @@ h3 {
 }
 
 .field-error {
-  color: var(--danger) !important;
+  color: var(--primary-dark) !important;
 }
 
 .message {
-  background: #f0f3f1;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 10px;
   line-height: 1.45;
   margin: 0;
@@ -500,19 +509,20 @@ h3 {
 }
 
 .message-error {
-  background: #fff1f0;
-  color: #862f2b;
+  background: var(--white);
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .message-success {
-  background: #edf7f1;
-  color: #20523d;
+  background: var(--surface);
+  color: var(--primary-dark);
 }
 
 .empty-state {
   align-items: center;
   background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed #c7d1cc;
+  border: 1px dashed var(--muted);
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -523,9 +533,10 @@ h3 {
 
 .empty-symbol {
   align-items: center;
-  background: var(--mint);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 50%;
-  color: var(--green);
+  color: var(--primary-dark);
   display: flex;
   font-size: 1.5rem;
   height: 54px;
@@ -551,8 +562,8 @@ h3 {
 
 .auth-intro {
   align-items: flex-start;
-  background: var(--green);
-  color: white;
+  background: var(--primary-dark);
+  color: var(--white);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -560,7 +571,7 @@ h3 {
 }
 
 .auth-intro .eyebrow {
-  color: #cbded5;
+  color: var(--line);
 }
 
 .auth-intro h1 {
@@ -568,7 +579,7 @@ h3 {
 }
 
 .auth-intro > p {
-  color: #dbe8e2;
+  color: var(--surface);
   font-size: 1.12rem;
   line-height: 1.65;
   max-width: 36rem;
@@ -583,7 +594,7 @@ h3 {
 }
 
 .auth-intro li::before {
-  color: #e3ad65;
+  color: var(--white);
   content: "✓";
   margin-right: 0.7rem;
 }
@@ -629,7 +640,7 @@ h3 {
 .setup-card {
   align-items: start;
   align-self: start;
-  background: white;
+  background: var(--white);
   border: 1px solid var(--line);
   border-radius: 22px;
   box-shadow: var(--shadow);
@@ -650,9 +661,9 @@ h3 {
 }
 
 .status-dot {
-  background: var(--amber);
+  background: var(--primary);
   border-radius: 50%;
-  box-shadow: 0 0 0 7px var(--amber-soft);
+  box-shadow: 0 0 0 7px var(--line);
   height: 12px;
   margin-top: 0.35rem;
   width: 12px;
@@ -672,8 +683,8 @@ h3 {
 }
 
 .loading-ring {
-  border: 3px solid #d9e2dd;
-  border-top-color: var(--green);
+  border: 3px solid var(--line);
+  border-top-color: var(--primary-dark);
   border-radius: 50%;
   height: 32px;
   width: 32px;
@@ -864,7 +875,7 @@ h3 {
 }
 
 .quick-capture textarea {
-  border: 1px solid #cbd4cf;
+  border: 1px solid var(--line);
   border-radius: 10px;
   min-height: 120px;
   padding: 0.85rem;
@@ -954,7 +965,7 @@ h3 {
 }
 
 .danger-zone {
-  border-color: #ebc9c6;
+  border-color: var(--primary-dark);
 }
 
 .review-context {

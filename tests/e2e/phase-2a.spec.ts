@@ -205,7 +205,7 @@ test("dashboard quick capture and deterministic sections render on phone and des
   await expect(page.getByRole("heading", { name: "Waiting on" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Blocked and at risk" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Stale workstreams" })).toBeVisible();
-  await page.screenshot({ path: "evidence/phase-2a/dashboard-desktop.png", fullPage: true });
+  await page.screenshot({ path: "evidence/nvlt-gray-branding/dashboard-desktop.png", fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();
@@ -213,7 +213,7 @@ test("dashboard quick capture and deterministic sections render on phone and des
   await page.getByLabel("Capture text").first().fill("Unicode 🧭 command update\nPreserve the entire second line.");
   await page.getByRole("button", { name: "Save to Needs triage" }).first().click();
   await expect(page.getByText("Saved to Needs triage.")).toBeVisible();
-  await page.screenshot({ path: "evidence/phase-2a/dashboard-phone-quick-capture.png", fullPage: true });
+  await page.screenshot({ path: "evidence/nvlt-gray-branding/dashboard-phone.png", fullPage: true });
 });
 
 test("triage, workstream detail, deletion confirmation, and weekly review render", async ({ page }) => {
@@ -221,7 +221,7 @@ test("triage, workstream detail, deletion confirmation, and weekly review render
   await signIn(page);
   await page.goto("/triage");
   await expect(page.getByRole("heading", { name: "Needs triage" })).toBeVisible();
-  await page.screenshot({ path: "evidence/phase-2a/triage.png", fullPage: true });
+  await page.screenshot({ path: "test-results/nvlt-gray-branding/triage.png", fullPage: true });
   await page.getByRole("button", { name: "Create workstream without leaving triage" }).click();
   const creationForm = page.locator("form.workstream-form");
   await creationForm.locator('input[required]').fill("Phase 2A evidence");
@@ -229,12 +229,12 @@ test("triage, workstream detail, deletion confirmation, and weekly review render
   await page.getByRole("button", { name: "Create workstream" }).click();
 
   await page.goto("/workstreams");
-  await page.screenshot({ path: "evidence/phase-2a/workstream-list.png", fullPage: true });
+  await page.screenshot({ path: "test-results/nvlt-gray-branding/workstream-list.png", fullPage: true });
   await page.getByRole("link", { name: /Neverlost command center/ }).click();
-  await page.screenshot({ path: "evidence/phase-2a/workstream-detail.png", fullPage: true });
+  await page.screenshot({ path: "test-results/nvlt-gray-branding/workstream-detail.png", fullPage: true });
   await page.getByRole("button", { name: "Review deletion" }).click();
   await expect(page.getByText("No entries will be deleted.")).toBeVisible();
-  await page.screenshot({ path: "evidence/phase-2a/workstream-deletion-confirmation.png", fullPage: true });
+  await page.screenshot({ path: "test-results/nvlt-gray-branding/workstream-deletion-confirmation.png", fullPage: true });
 
   await page.goto("/review");
   await page.waitForLoadState("networkidle");
@@ -245,5 +245,5 @@ test("triage, workstream detail, deletion confirmation, and weekly review render
   }
   await page.getByRole("button", { name: "Mark weekly review complete" }).click();
   await expect(page.getByText("Weekly review completion recorded.", { exact: false })).toBeVisible();
-  await page.screenshot({ path: "evidence/phase-2a/weekly-review.png", fullPage: true });
+  await page.screenshot({ path: "test-results/nvlt-gray-branding/weekly-review.png", fullPage: true });
 });

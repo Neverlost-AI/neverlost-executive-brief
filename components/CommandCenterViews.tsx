@@ -51,6 +51,20 @@ function label(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
+const stateIcons: Record<Entry["command_state"], string> = {
+  inbox: "○",
+  active: "▶",
+  waiting: "◷",
+  blocked: "■",
+  resolved: "✓",
+};
+
+const healthIcons: Record<Workstream["health"], string> = {
+  on_track: "✓",
+  at_risk: "▲",
+  off_track: "!",
+};
+
 export function CommandCenterView({
   view,
   session,
@@ -234,18 +248,20 @@ function Section({ title, href, children }: { title: string; href: string; child
 }
 
 function EntryRow({ entry, detail }: { entry: Entry; detail?: string }) {
+  const state = `${stateIcons[entry.command_state]} ${label(entry.command_state)}`;
   return (
     <Link className="command-row" href={`/entries/${entry.id}`}>
-      <span><strong>{entry.title}</strong><small>{detail || `${label(entry.command_type)} · ${label(entry.command_state)}`}</small></span>
+      <span><strong>{entry.title}</strong><small>{label(entry.command_type)} · {state}{detail ? ` · ${detail}` : ""}</small></span>
       <span className="badge">Item</span>
     </Link>
   );
 }
 
 function WorkstreamRow({ workstream, detail }: { workstream: Workstream; detail?: string }) {
+  const health = `${healthIcons[workstream.health]} ${label(workstream.health)}`;
   return (
     <Link className="command-row" href={`/workstreams/${workstream.id}`}>
-      <span><strong>{workstream.name}</strong><small>{detail || `${label(workstream.status)} · ${label(workstream.health)}`}</small></span>
+      <span><strong>{workstream.name}</strong><small>{label(workstream.status)} · {health}{detail ? ` · ${detail}` : ""}</small></span>
       <span className="badge">Workstream</span>
     </Link>
   );

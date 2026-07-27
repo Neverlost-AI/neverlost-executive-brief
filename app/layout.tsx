@@ -22,10 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol =
     requestHeaders.get("x-forwarded-proto") ||
     (host.startsWith("localhost") ? "http" : "https");
-  const imageUrl = `${protocol}://${host}/og.png`;
-  const title = "Neverlost Executive Brief";
+  void protocol;
+  const title = "NVLT Command Center · by Neverlost";
   const description =
-    "A private, manual cross-device inbox for continuity items that need deliberate review.";
+    "A private, manual command center for cross-device continuity, triage, workstreams, and deliberate review.";
 
   return {
     title,
@@ -33,13 +33,11 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [{ url: imageUrl, width: 1744, height: 909 }],
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title,
       description,
-      images: [imageUrl],
     },
   };
 }

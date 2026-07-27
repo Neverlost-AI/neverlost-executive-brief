@@ -1,6 +1,7 @@
 "use client";
 
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -93,7 +94,7 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
 
   return (
     <div className="app-shell">
-      <Header client={client} email={session.user.email || "Signed-in user"} />
+      <Header client={client} email={session.user.email || "Signed-in user"} view={view} />
       <main id="main-content" className="main-content">
         {view === "dashboard" && <Dashboard session={session} />}
         {view === "capture" && <Capture session={session} />}
@@ -106,13 +107,34 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
         ) : null}
       </main>
       <footer className="app-footer">
-        Review-only manual MVP · Your entries remain under your control.
+        NVLT Command Center · by Neverlost · Review-only manual MVP
       </footer>
     </div>
   );
 }
 
-function Header({ client, email }: { client: SupabaseClient; email: string }) {
+function Header({ client, email, view }: { client: SupabaseClient; email: string; view: View }) {
+  const activeHref = {
+    dashboard: "/",
+    capture: "/capture",
+    archive: "/archive",
+    detail: "/entries",
+    "command-dashboard": "/dashboard",
+    triage: "/triage",
+    entries: "/entries",
+    workstreams: "/workstreams",
+    "workstream-detail": "/workstreams",
+    review: "/review",
+  }[view];
+  const links = [
+    ["/", "Brief"],
+    ["/dashboard", "Command Center"],
+    ["/capture", "Capture"],
+    ["/triage", "Triage"],
+    ["/workstreams", "Workstreams"],
+    ["/review", "Review"],
+    ["/archive", "Archive"],
+  ] as const;
   return (
     <header className="app-header">
       <a className="skip-link" href="#main-content">
@@ -120,13 +142,11 @@ function Header({ client, email }: { client: SupabaseClient; email: string }) {
       </a>
       <Brand />
       <nav aria-label="Primary navigation">
-        <Link href="/">Brief</Link>
-        <Link href="/dashboard">Command Center</Link>
-        <Link href="/capture">Capture</Link>
-        <Link href="/triage">Triage</Link>
-        <Link href="/workstreams">Workstreams</Link>
-        <Link href="/review">Review</Link>
-        <Link href="/archive">Archive</Link>
+        {links.map(([href, label]) => (
+          <Link key={href} href={href} aria-current={activeHref === href ? "page" : undefined}>
+            {label}
+          </Link>
+        ))}
       </nav>
       <div className="account">
         <span title={email}>{email}</span>
@@ -689,12 +709,12 @@ function PriorityField({
 function Brand() {
   return (
     <div className="brand">
-      <span className="brand-mark" aria-hidden="true">
-        N
+      <span className="brand-mark">
+        <Image src="/favicon.svg" width={42} height={42} alt="NVLT logo" priority />
       </span>
       <div>
-        <strong>Neverlost</strong>
-        <span>Executive Brief</span>
+        <strong>NVLT Command Center</strong>
+        <span>by Neverlost</span>
       </div>
     </div>
   );
