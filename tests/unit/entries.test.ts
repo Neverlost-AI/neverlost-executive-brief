@@ -18,6 +18,14 @@ const base: Entry = {
   updated_at: "2026-07-24T12:00:00.000Z",
   reviewed_at: null,
   archived_at: null,
+  workstream_id: null,
+  command_type: "note",
+  command_state: "inbox",
+  next_action: null,
+  due_on: null,
+  review_on: null,
+  triaged_at: null,
+  resolved_at: null,
 };
 
 describe("entry validation", () => {

@@ -15,9 +15,20 @@ import {
   type EntryUpdate,
 } from "@/lib/entries";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { CommandCenterView, EntryCommandFields } from "@/components/CommandCenterViews";
 
-type View = "dashboard" | "capture" | "archive" | "detail";
-type Props = { view: View; entryId?: string };
+type View =
+  | "dashboard"
+  | "capture"
+  | "archive"
+  | "detail"
+  | "command-dashboard"
+  | "triage"
+  | "entries"
+  | "workstreams"
+  | "workstream-detail"
+  | "review";
+type Props = { view: View; entryId?: string; workstreamId?: string };
 const emptyInput: EntryInput = {
   title: "",
   content: "",
@@ -40,7 +51,7 @@ async function authorizedFetch(
   });
 }
 
-export function ExecutiveBriefApp({ view, entryId }: Props) {
+export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
   const [client, setClient] = useState<SupabaseClient | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
@@ -90,6 +101,9 @@ export function ExecutiveBriefApp({ view, entryId }: Props) {
         {view === "detail" && entryId && (
           <EntryDetail session={session} entryId={entryId} />
         )}
+        {view.startsWith("command-") || ["triage", "entries", "workstreams", "workstream-detail", "review"].includes(view) ? (
+          <CommandCenterView view={view} session={session} workstreamId={workstreamId} />
+        ) : null}
       </main>
       <footer className="app-footer">
         Review-only manual MVP · Your entries remain under your control.
@@ -107,7 +121,11 @@ function Header({ client, email }: { client: SupabaseClient; email: string }) {
       <Brand />
       <nav aria-label="Primary navigation">
         <Link href="/">Brief</Link>
+        <Link href="/dashboard">Command Center</Link>
         <Link href="/capture">Capture</Link>
+        <Link href="/triage">Triage</Link>
+        <Link href="/workstreams">Workstreams</Link>
+        <Link href="/review">Review</Link>
         <Link href="/archive">Archive</Link>
       </nav>
       <div className="account">
@@ -547,6 +565,9 @@ function EntryDetail({ session, entryId }: { session: Session; entryId: string }
           </button>
         </div>
       </form>
+      {!entry.archived_at && (
+        <EntryCommandFields session={session} entry={entry} onUpdated={setEntry} />
+      )}
     </>
   );
 }
