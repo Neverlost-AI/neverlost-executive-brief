@@ -1,8 +1,8 @@
 # Neverlost Executive Brief
 
-Status: `PHASE_1_MANUAL_CROSS_DEVICE_MVP_HUMAN_ACCEPTED`
+Status: `PHASE_2A_MANUAL_COMMAND_CENTER_HUMAN_ACCEPTED`
 
-A private, manual cross-device inbox for continuity items. Capture an item on a phone, then review, edit, archive, restore, or delete it from a computer using the same Supabase-authenticated account.
+A private, manual cross-device continuity inbox and owner-controlled Command Center. Phase 1 capture remains preserved while Phase 2A adds manual triage, workstreams, command states, deterministic dashboard views, and weekly review.
 
 There is no AI, automatic summarization, prioritization, external integration, monitoring, scheduler, or background action.
 
@@ -88,7 +88,7 @@ See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
 - Password recovery, MFA, rate-limit tuning, backups, retention, and incident response are configured in Supabase rather than this MVP.
 - Delete is permanent and has no in-product recovery.
 - Offline capture, notifications, native apps, collaboration, sharing, organizations, and integrations are not included.
-- Phase 1 human acceptance passed using the protected private preview. No production deployment exists, the app is not production-ready, Phase 2 has not started, and public launch or commercial readiness is not approved.
+- Phase 1 and Phase 2A human acceptance passed using protected private previews. Phase 2A has one non-blocking UX note: an empty workstream selector should explicitly say that no workstreams exist and direct the user to create one. No production deployment is authorized, the app is not production-ready, and public launch or commercial readiness is not approved.
 
 ## Project documents
 
@@ -102,6 +102,8 @@ See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
 - `KNOWN_LIMITATIONS.md`
 - `SECURITY_REVIEW.md`
 - `PHASE_1_MANUAL_CROSS_DEVICE_MVP_BUILD_REPORT.md`
+- `PHASE_2A_MANUAL_COMMAND_CENTER_IMPLEMENTATION_REPORT.md`
+- `PHASE_2A_ACCEPTANCE_CHECKPOINT.md`
 
 ## License and ownership
 

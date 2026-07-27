@@ -1,8 +1,8 @@
 # Phase 2A Manual Command Center Implementation Report
 
-Status: `PHASE_2A_IMPLEMENTATION_READY_FOR_HUMAN_REVIEW`
+Status: `PHASE_2A_MANUAL_COMMAND_CENTER_HUMAN_ACCEPTED`
 
-Human acceptance has **not** been declared. No deployment, hosted migration, production-data change, or hosted-authentication change was performed.
+Human acceptance was declared after real-device testing against the protected isolated Phase 2A preview. This acceptance does not authorize a branch merge, production deployment, public launch, or commercial release.
 
 ## Approval and baseline
 
@@ -13,6 +13,25 @@ Human acceptance has **not** been declared. No deployment, hosted migration, pro
 - Isolated branch: `phase-2a-manual-command-center`
 - Approval checkpoint commit: `78188f99a8d7e6b8d84d1225aec79e7a7dc30f8e`
 - The one authorized specification typo was corrected from `v0.2` to `v0.2.1`; no other v0.2.1 specification text was changed.
+
+## Human acceptance checkpoint
+
+Human acceptance was declared on July 27, 2026, against the protected Vercel preview connected to the isolated Supabase project with masked reference `egic…eeka`.
+
+Accepted real-device evidence:
+
+- capture on the computer and review on the phone;
+- cross-device synchronization;
+- workstream creation;
+- assignment of an item to a workstream;
+- confirmed workstream deletion; and
+- preservation of the assigned item with its return to Inbox after workstream deletion.
+
+One minor, non-blocking UX note was recorded:
+
+> When no workstreams exist, the selector should say “No workstreams yet — create one first” instead of appearing empty.
+
+The UX note is not part of this documentation-only checkpoint and has not been implemented. The protected preview remains the accepted review target. No merge or production promotion is authorized.
 
 ## Implementation result
 
@@ -75,8 +94,14 @@ The forward migration was applied to a disposable PostgreSQL-compatible database
 | Local authenticated Phase 1 phone-to-desktop lifecycle | Pass |
 | Phase 2A authenticated local browser flows | Pass |
 | Production build | Pass; all Phase 1 and Phase 2A routes emitted |
+| Isolated hosted migrations | Pass: Phase 1 and Phase 2A ledgers applied only to `egic…eeka` |
+| Hosted transactional security verification | Pass: schema, forced RLS, policies, privileges, defaults, transitions, deletion preservation |
+| Live two-owner isolation | Pass: cross-owner reads, updates, deletes, preferences, and workstream assignment blocked |
+| Real-device Phase 2A acceptance | Human accepted with one minor non-blocking UX note |
 
 The dedicated hosted-account `cross-device.spec.ts` was skipped because `.env.local` intentionally contains only the two public `NEXT_PUBLIC_SUPABASE_*` settings and no E2E account credentials. The stateful local authenticated Playwright test independently passed the Phase 1 phone capture, desktop recovery, review, and archive regression without touching hosted data.
+
+After the implementation handoff, the isolated hosted project was migrated and verified with transactional synthetic records, live two-owner Auth/REST isolation, and a dedicated synthetic acceptance account. Temporary isolation users and records were removed. The protected preview then passed the human acceptance evidence recorded above.
 
 ## Rendered evidence
 
@@ -160,14 +185,14 @@ Do not perform these steps without separate deployment authorization.
 - Complete the ten-step weekly review and confirm only the latest completion timestamp is retained.
 - Confirm cross-device synchronization and no horizontal page scrolling at the actual phone width.
 - Confirm no automatic classification, status, health, action, date, or recommendation appears.
-- Do not mark Phase 2A human-accepted until every real-device item passes.
+- Phase 2A human acceptance was subsequently declared by the human tester and is recorded in `PHASE_2A_ACCEPTANCE_CHECKPOINT.md`.
 
 ## Deviations and gates
 
 1. One test-only development dependency, `@electric-sql/pglite`, was added after reporting the local absence of Docker, PostgreSQL, `psql`, and Supabase CLI. It is not part of the application runtime and was used only for disposable migration, rollback, and RLS verification.
-2. The live-account Playwright test was not run because no E2E credentials are present. The local authenticated regression passed, but the hosted protected-review test remains a post-migration, post-preview gate.
-3. No protected-review deployment or hosted migration was authorized or performed.
-4. No production data or hosted authentication setting was modified.
+2. At the implementation handoff, the live-account Playwright test was not run because no E2E credentials were present. The later isolated hosted verification and real-device human acceptance are recorded separately above.
+3. At the implementation handoff, no protected-review deployment or hosted migration had been authorized or performed. Those isolated review steps were subsequently authorized and completed without touching the shared Phase 1 project.
+4. No production data or Production environment was modified.
 
 ## Complete changed-file list
 
