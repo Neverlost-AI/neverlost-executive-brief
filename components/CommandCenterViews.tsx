@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { buildCommandCenter, PRODUCT_TIMEZONE } from "@/lib/command-center";
+import { answerOperatorQuestion, buildOperatorSnapshot } from "@/lib/operator";
 import {
   commandStates,
   commandTypes,
@@ -20,6 +21,7 @@ import {
 
 type CommandView =
   | "command-dashboard"
+  | "operator"
   | "triage"
   | "entries"
   | "workstreams"
@@ -75,6 +77,7 @@ export function CommandCenterView({
   workstreamId?: string;
 }) {
   if (view === "command-dashboard") return <CommandDashboard session={session} />;
+  if (view === "operator") return <OperatorConsole session={session} />;
   if (view === "triage") return <Triage session={session} />;
   if (view === "entries") return <AllEntries session={session} />;
   if (view === "workstreams") return <Workstreams session={session} />;
@@ -227,6 +230,129 @@ function CommandDashboard({ session }: { session: Session }) {
             </Section>
           </div>
           <div className="desktop-capture"><QuickCapture session={session} onSaved={data.reload} /></div>
+        </>
+      )}
+    </>
+  );
+}
+
+function OperatorConsole({ session }: { session: Session }) {
+  const data = useDashboard(session);
+  const snapshot = useMemo(
+    () => buildOperatorSnapshot(data.entries, data.workstreams, new Date(data.serverNow)),
+    [data.entries, data.workstreams, data.serverNow],
+  );
+  const [question, setQuestion] = useState("What needs attention?");
+  const [answer, setAnswer] = useState("");
+
+  function ask(event: React.FormEvent) {
+    event.preventDefault();
+    setAnswer(answerOperatorQuestion(question, snapshot));
+  }
+
+  return (
+    <>
+      <Heading eyebrow="Operator v0.1 · read-only" title="Neverlost Operator">
+        Deterministic attention and next-action proposals over accepted Command Center state. Nothing here changes source state automatically.
+      </Heading>
+      {data.loading && <p className="message">Loading Operator...</p>}
+      {data.error && <p className="message message-error">{data.error}</p>}
+      {!data.loading && !data.error && (
+        <>
+          <section className="panel operator-ask" aria-labelledby="ask-neverlost-title">
+            <div>
+              <div className="eyebrow">Ask Neverlost</div>
+              <h2 id="ask-neverlost-title">Ask the current state</h2>
+              <p>v0.1 uses bounded deterministic questions. No model call is made.</p>
+            </div>
+            <form onSubmit={ask}>
+              <label className="sr-only" htmlFor="operator-question">Question</label>
+              <input
+                id="operator-question"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder="What needs attention?"
+              />
+              <button className="button button-primary">Ask</button>
+            </form>
+            <div className="operator-prompts" aria-label="Supported questions">
+              {["What needs attention?", "What am I waiting on?", "What changed recently?", "What should I work on next?"].map((prompt) => (
+                <button
+                  className="button button-secondary"
+                  key={prompt}
+                  type="button"
+                  onClick={() => {
+                    setQuestion(prompt);
+                    setAnswer(answerOperatorQuestion(prompt, snapshot));
+                  }}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+            {answer && <p className="operator-answer" role="status">{answer}</p>}
+          </section>
+
+          <div className="command-counts operator-counts">
+            <Count label="Needs attention" value={snapshot.needsAttention.length} />
+            <Count label="Proposals" value={snapshot.proposals.length} />
+            <Count label="Waiting" value={snapshot.waiting.length} />
+            <Count label="Active workstreams" value={snapshot.activeWorkstreams.length} />
+          </div>
+
+          <div className="operator-layout">
+            <section className="panel operator-proposals">
+              <div className="section-heading">
+                <div>
+                  <div className="eyebrow">Suggested actions</div>
+                  <h2>Human review queue</h2>
+                </div>
+                <span className="operator-authority">Human approval required</span>
+              </div>
+              {snapshot.proposals.length === 0 ? (
+                <p className="muted">No current Operator proposals.</p>
+              ) : (
+                <div className="operator-proposal-list">
+                  {snapshot.proposals.slice(0, 10).map((proposal) => (
+                    <article className="operator-proposal" key={proposal.id}>
+                      <div>
+                        <small>{proposal.kind.replaceAll("_", " ")}</small>
+                        <h3>{proposal.summary}</h3>
+                        <p>{proposal.rationale}</p>
+                      </div>
+                      {proposal.sourceEntryId ? (
+                        <Link className="button button-secondary" href={`/entries/${proposal.sourceEntryId}`}>Review item</Link>
+                      ) : proposal.workstreamId ? (
+                        <Link className="button button-secondary" href={`/workstreams/${proposal.workstreamId}`}>Review workstream</Link>
+                      ) : null}
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <div className="operator-side">
+              <Section title="Waiting" href="/entries">
+                {snapshot.waiting.slice(0, 5).map((entry) => (
+                  <EntryRow key={entry.id} entry={entry} detail={entry.review_on ? `Review ${entry.review_on}` : "Review date missing"} />
+                ))}
+              </Section>
+              <Section title="Workstreams" href="/workstreams">
+                {snapshot.activeWorkstreams.slice(0, 5).map((workstream) => (
+                  <WorkstreamRow key={workstream.id} workstream={workstream} />
+                ))}
+              </Section>
+              <Section title="Recent changes" href="/entries">
+                {snapshot.recentChanges.slice(0, 5).map((entry) => (
+                  <EntryRow key={entry.id} entry={entry} detail={`Updated ${formatTimestamp(entry.updated_at)}`} />
+                ))}
+              </Section>
+            </div>
+          </div>
+
+          <p className="operator-boundary">
+            Operator v0.1 is a read model only: proposals are derived from existing Command Center fields and are not persisted, accepted, sent, or executed.
+          </p>
         </>
       )}
     </>

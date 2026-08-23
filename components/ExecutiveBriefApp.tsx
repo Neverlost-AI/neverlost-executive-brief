@@ -16,6 +16,7 @@ import {
   type EntryUpdate,
 } from "@/lib/entries";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { hasPasswordRecoveryMarker, passwordRecoveryRedirect } from "@/lib/auth-recovery";
 import { CommandCenterView, EntryCommandFields } from "@/components/CommandCenterViews";
 
 type View =
@@ -24,6 +25,8 @@ type View =
   | "archive"
   | "detail"
   | "command-dashboard"
+  | "operator"
+  | "reset-password"
   | "triage"
   | "entries"
   | "workstreams"
@@ -57,20 +60,31 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
   const [configurationError, setConfigurationError] = useState("");
+  const [recoveryMode, setRecoveryMode] = useState(false);
 
   useEffect(() => {
     let active = true;
     let unsubscribe = () => {};
+
+    if (typeof window !== "undefined") {
+      setRecoveryMode(hasPasswordRecoveryMarker(window.location.href));
+    }
+
     getBrowserSupabase()
       .then(async (supabase) => {
         if (!active) return;
         setClient(supabase);
-        const { data } = await supabase.auth.getSession();
-        if (active) setSession(data.session);
-        const listener = supabase.auth.onAuthStateChange((_event, nextSession) => {
+
+        const listener = supabase.auth.onAuthStateChange((event, nextSession) => {
+          if (!active) return;
           setSession(nextSession);
+          if (event === "PASSWORD_RECOVERY") setRecoveryMode(true);
+          if (event === "SIGNED_OUT") setRecoveryMode(false);
         });
         unsubscribe = () => listener.data.subscription.unsubscribe();
+
+        const { data } = await supabase.auth.getSession();
+        if (active) setSession(data.session);
       })
       .catch(() => {
         if (active) {
@@ -90,6 +104,8 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
   if (!client || configurationError) {
     return <ReviewSetupState message={configurationError} />;
   }
+  if (recoveryMode) return <PasswordReset client={client} session={session} />;
+  if (view === "reset-password") return <PasswordRecoveryRequest client={client} />;
   if (!session) return <SignIn client={client} />;
 
   return (
@@ -102,7 +118,7 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
         {view === "detail" && entryId && (
           <EntryDetail session={session} entryId={entryId} />
         )}
-        {view.startsWith("command-") || ["triage", "entries", "workstreams", "workstream-detail", "review"].includes(view) ? (
+        {view.startsWith("command-") || ["operator", "triage", "entries", "workstreams", "workstream-detail", "review"].includes(view) ? (
           <CommandCenterView view={view} session={session} workstreamId={workstreamId} />
         ) : null}
       </main>
@@ -120,6 +136,8 @@ function Header({ client, email, view }: { client: SupabaseClient; email: string
     archive: "/archive",
     detail: "/entries",
     "command-dashboard": "/dashboard",
+    operator: "/operator",
+    "reset-password": "/reset-password",
     triage: "/triage",
     entries: "/entries",
     workstreams: "/workstreams",
@@ -129,6 +147,7 @@ function Header({ client, email, view }: { client: SupabaseClient; email: string
   const links = [
     ["/", "Brief"],
     ["/dashboard", "Command Center"],
+    ["/operator", "Operator"],
     ["/capture", "Capture"],
     ["/triage", "Triage"],
     ["/workstreams", "Workstreams"],
@@ -225,9 +244,227 @@ function SignIn({ client }: { client: SupabaseClient }) {
             {submitting ? "Signing in…" : "Sign in securely"}
           </button>
         </form>
+        <Link className="button button-quiet" href="/reset-password">
+          Forgot password?
+        </Link>
         <p className="fine-print">
           No account data is shared publicly. There is no AI processing.
         </p>
+      </section>
+    </main>
+  );
+}
+
+function PasswordRecoveryRequest({ client }: { client: SupabaseClient }) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+  const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setSubmitting(true);
+    setStatus("");
+    const { error } = await client.auth.resetPasswordForEmail(email, {
+      redirectTo: passwordRecoveryRedirect(window.location.origin),
+    });
+    setSubmitting(false);
+
+    if (error) {
+  console.error("Password recovery error:", error);
+  setStatus(`Password recovery failed: ${error.message}`);
+  return;
+}
+
+    setSent(true);
+    setStatus(
+      "If that account exists, a recovery link has been sent. Open it on this device to choose a new password.",
+    );
+  }
+
+  return (
+    <main className="auth-layout">
+      <section className="auth-intro">
+        <div className="eyebrow">Private account recovery</div>
+        <h1>Recover access without weakening the boundary.</h1>
+        <p>
+          Password recovery stays inside Supabase authentication. Neverlost does not
+          receive, store, or expose your password.
+        </p>
+        <ul>
+          <li>Recovery requires access to the account email</li>
+          <li>No public signup is added</li>
+          <li>Existing Row Level Security ownership is preserved</li>
+        </ul>
+      </section>
+      <section className="auth-card" aria-labelledby="recovery-title">
+        <Brand />
+        <div>
+          <div className="eyebrow">Account recovery</div>
+          <h2 id="recovery-title">Reset password</h2>
+          <p>Enter the email attached to your existing Command Center account.</p>
+        </div>
+        <form onSubmit={submit} className="stack">
+          <Field label="Email" htmlFor="recovery-email">
+            <input
+              id="recovery-email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </Field>
+          {status && (
+            <p className={`message ${sent ? "message-success" : "message-error"}`} role="status">
+              {status}
+            </p>
+          )}
+          <button className="button button-primary" disabled={submitting}>
+            {submitting ? "Sending recovery link…" : "Send recovery link"}
+          </button>
+        </form>
+        <Link className="button button-quiet" href="/operator">
+          Back to sign in
+        </Link>
+      </section>
+    </main>
+  );
+}
+
+function PasswordReset({
+  client,
+  session,
+}: {
+  client: SupabaseClient;
+  session: Session | null;
+}) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState("");
+  const [completed, setCompleted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    setStatus("");
+
+    if (password.length < 8) {
+      setStatus("Use at least 8 characters for the new password.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setStatus("The two passwords do not match.");
+      return;
+    }
+
+    setSubmitting(true);
+    const { error } = await client.auth.updateUser({ password });
+    setSubmitting(false);
+
+    if (error) {
+      setStatus("The password could not be updated. The recovery link may have expired.");
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      window.history.replaceState({}, document.title, "/reset-password");
+    }
+    setCompleted(true);
+    setPassword("");
+    setConfirmPassword("");
+    setStatus("Password updated. Your existing account and owned data are unchanged.");
+  }
+
+  if (!session) {
+    return (
+      <main className="auth-layout">
+        <section className="auth-intro">
+          <div className="eyebrow">Private account recovery</div>
+          <h1>This recovery link cannot open a secure session.</h1>
+          <p>The link may be expired, already used, or incomplete.</p>
+        </section>
+        <section className="auth-card" aria-labelledby="expired-recovery-title">
+          <Brand />
+          <div>
+            <div className="eyebrow">Recovery link</div>
+            <h2 id="expired-recovery-title">Request a new link</h2>
+            <p>No password was changed.</p>
+          </div>
+          <Link className="button button-primary" href="/reset-password">
+            Start password recovery
+          </Link>
+          <Link className="button button-quiet" href="/operator">
+            Back to sign in
+          </Link>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="auth-layout">
+      <section className="auth-intro">
+        <div className="eyebrow">Recovery session verified</div>
+        <h1>Choose a new password.</h1>
+        <p>
+          This changes authentication only. Your existing Command Center ownership,
+          entries, and workstreams remain attached to the same account.
+        </p>
+      </section>
+      <section className="auth-card" aria-labelledby="new-password-title">
+        <Brand />
+        <div>
+          <div className="eyebrow">Secure password update</div>
+          <h2 id="new-password-title">Set new password</h2>
+          <p>Use at least 8 characters.</p>
+        </div>
+        {!completed ? (
+          <form onSubmit={submit} className="stack">
+            <Field label="New password" htmlFor="new-password">
+              <input
+                id="new-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </Field>
+            <Field label="Confirm new password" htmlFor="confirm-password">
+              <input
+                id="confirm-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+            </Field>
+            {status && (
+              <p className="message message-error" role="alert">
+                {status}
+              </p>
+            )}
+            <button className="button button-primary" disabled={submitting}>
+              {submitting ? "Updating password…" : "Update password"}
+            </button>
+          </form>
+        ) : (
+          <div className="stack">
+            <p className="message message-success" role="status">
+              {status}
+            </p>
+            <a className="button button-primary" href="/dashboard">
+              Continue to Command Center
+            </a>
+            <a className="button button-secondary" href="/operator">
+              Continue to Operator
+            </a>
+          </div>
+        )}
       </section>
     </main>
   );
