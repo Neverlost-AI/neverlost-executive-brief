@@ -1057,3 +1057,158 @@ h3 {
   .command-grid > :nth-child(4) { order: 6; }
   .command-grid > :nth-child(6) { order: 7; }
 }
+
+/* Operator v0.1: deterministic read-only attention layer. */
+.operator-ask {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.35rem;
+}
+
+.operator-ask h2 {
+  margin-bottom: 0.4rem;
+}
+
+.operator-ask p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.operator-ask form {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr auto;
+}
+
+.operator-ask input {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-height: 46px;
+  padding: 0.8rem 0.9rem;
+  width: 100%;
+}
+
+.operator-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.operator-prompts .button {
+  font-size: 0.82rem;
+  min-height: 38px;
+  padding: 0.5rem 0.7rem;
+}
+
+.operator-answer {
+  background: var(--surface);
+  border-left: 4px solid var(--primary-dark);
+  border-radius: 10px;
+  color: var(--ink) !important;
+  line-height: 1.55;
+  padding: 1rem;
+}
+
+.operator-layout {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.75fr);
+}
+
+.operator-proposals {
+  padding: 1.25rem;
+}
+
+.operator-proposals .section-heading {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.operator-proposals h2 {
+  margin-bottom: 0;
+}
+
+.operator-authority {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--primary-dark);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.65rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.operator-proposal-list {
+  display: grid;
+}
+
+.operator-proposal {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr auto;
+  padding: 1.05rem 0;
+}
+
+.operator-proposal:first-child {
+  border-top: 0;
+}
+
+.operator-proposal small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.operator-proposal h3 {
+  font-size: 1.12rem;
+  margin: 0.28rem 0 0.4rem;
+}
+
+.operator-proposal p {
+  color: var(--muted);
+  line-height: 1.48;
+  margin-bottom: 0;
+}
+
+.operator-side {
+  display: grid;
+  gap: 1rem;
+}
+
+.operator-boundary {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 1.25rem 0 0;
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .operator-ask form,
+  .operator-layout,
+  .operator-proposal {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-proposal .button {
+    justify-self: start;
+  }
+
+  .operator-proposals .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
