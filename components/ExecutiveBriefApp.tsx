@@ -60,15 +60,13 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
   const [configurationError, setConfigurationError] = useState("");
-  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(() =>
+    typeof window !== "undefined" && hasPasswordRecoveryMarker(window.location.href),
+  );
 
   useEffect(() => {
     let active = true;
     let unsubscribe = () => {};
-
-    if (typeof window !== "undefined") {
-      setRecoveryMode(hasPasswordRecoveryMarker(window.location.href));
-    }
 
     getBrowserSupabase()
       .then(async (supabase) => {

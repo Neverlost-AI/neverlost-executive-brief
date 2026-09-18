@@ -4,6 +4,8 @@ Status: `PHASE_2A_MANUAL_COMMAND_CENTER_HUMAN_ACCEPTED`
 
 A private, manual cross-device continuity inbox and owner-controlled Command Center. Phase 1 capture remains preserved while Phase 2A adds manual triage, workstreams, command states, deterministic dashboard views, and weekly review.
 
+The repository also includes a public recruiter-facing portfolio demo at `/demo`. The demo is an isolated client-side workspace with synthetic data; it does not authenticate, read or write Supabase, or call the authenticated entry APIs.
+
 There is no AI, automatic summarization, prioritization, external integration, monitoring, scheduler, or background action.
 
 ## Stack
@@ -45,6 +47,23 @@ pnpm dev
 
 Open the local URL printed by the development server.
 
+### Application modes
+
+#### Private authenticated mode
+
+- Routes outside `/demo` use Supabase email/password authentication.
+- Data is scoped to the authenticated account and protected by Row Level Security.
+- Entries and workstreams persist across devices through the existing authenticated API routes.
+
+#### Public portfolio demo
+
+- Intended recruiter-facing URL: `/demo`
+- No authentication or environment variables are required.
+- The seeded workspace contains fictional synthetic records only.
+- Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v1`.
+- `Reset demo` restores the original seed and `Start blank` clears only the local demo workspace.
+- The demo performs no Supabase reads or writes and is not production clinical software.
+
 ## Validation
 
 ```text
@@ -67,8 +86,25 @@ To run the database ownership test, execute `supabase/tests/entries_rls.sql` aga
 3. Build the validated source.
 4. Deploy privately for review.
 5. Run `MANUAL_ACCEPTANCE_CHECKLIST.md` against the deployed URL.
+6. Verify that `/demo` renders without Supabase environment variables before sharing that public demo URL.
 
-Do not expose the review environment publicly before security and human acceptance are complete.
+Only the isolated synthetic `/demo` experience is intended for public portfolio viewing. Do not expose private account credentials or weaken authentication/RLS for the authenticated routes.
+
+### Vercel/Vinext deployment note
+
+The linked Vercel project currently uses the `Other` framework preset with `npm run build` and an `.output` output directory. This Vinext application instead emits a Cloudflare-compatible `dist/client` plus `dist/server` worker, so Git-based Vercel builds cannot deploy it by merely changing the output directory. `dist/client` is not a standalone application, and the repository must not manufacture a placeholder `.output` directory.
+
+The repository includes a small deployment adapter in `build/vercel-handler.mjs` that translates Vercel's Node request/response contract to the compiled Vinext worker. It preserves streaming, request bodies, and response cookies. It does not change application routing or authentication. Package and deploy a preview with:
+
+```text
+npm run build
+node build/package-vercel.mjs
+vercel deploy --prebuilt --archive=tgz
+```
+
+The packaging command replaces only generated `.vercel/output` and copies no environment files. It serves `dist/client` through the filesystem route and the worker through a Node 24 function. Existing images use `unoptimized`; Cloudflare image-transformation bindings are not supplied by this adapter.
+
+The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current preview remains protected and requires an explicitly approved public hosting/protection configuration before sharing with recruiters.
 
 ## Data and security
 
@@ -89,6 +125,7 @@ See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
 - Delete is permanent and has no in-product recovery.
 - Offline capture, notifications, native apps, collaboration, sharing, organizations, and integrations are not included.
 - Phase 1 and Phase 2A human acceptance passed using protected private previews. Phase 2A has one non-blocking UX note: an empty workstream selector should explicitly say that no workstreams exist and direct the user to create one. No production deployment is authorized, the app is not production-ready, and public launch or commercial readiness is not approved.
+- The public demo is a portfolio illustration with browser-local synthetic data. It does not claim clinical, production, or commercial readiness.
 
 ## Project documents
 

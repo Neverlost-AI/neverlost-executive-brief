@@ -23,6 +23,7 @@ The source implements the intended defense-in-depth ownership model. Static and 
 - API error responses do not return entry data or raw provider errors.
 - Application code does not intentionally log entry titles or content.
 - Destructive deletion requires a browser confirmation.
+- The public `/demo` mode is isolated from Supabase and authenticated application APIs, uses synthetic fixtures only, and namespaces optional local persistence specifically to the demo.
 
 ## Verification completed
 
