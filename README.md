@@ -57,11 +57,12 @@ Open the local URL printed by the development server.
 
 #### Public portfolio demo
 
-- Public recruiter demo: https://neverlost-executive-brief-ce7hc9koe-neverlost-ai1.vercel.app/demo
+- Public recruiter demo: https://neverlost-executive-brief-4ppeovmvi-neverlost-ai1.vercel.app/demo
 - No authentication or environment variables are required.
-- The seeded workspace contains fictional synthetic records only.
-- Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v1`.
-- `Reset demo` restores the original seed and `Start blank` clears only the local demo workspace.
+- The seeded workspace contains eight fictional entries and three fictional workstreams spanning Inbox, Active, Waiting, Blocked, Resolved, risk, stale-review, next-action, and decision states.
+- Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v2`. The accepted v1 key is not read or rewritten.
+- Deterministic stale and overdue behavior uses the fixed synthetic reference time September 19, 2026, so the portfolio remains stable as calendar time passes.
+- `Reset demo` restores the complete synthetic Command Center workspace and `Start blank` clears only the local demo workspace.
 - The demo performs no Supabase reads or writes and is not production clinical software.
 
 ### Public demo acceptance — 2026-09-18
@@ -81,6 +82,15 @@ Open the local URL printed by the development server.
 - The final preview passed desktop and mobile loading/layout, edit/reload, review, archive, confirmed delete, Reset demo, and confirmed Start blank/reload. Both test contexts were restored to six active plus one archived synthetic entry. Inter loaded successfully, with no demo console/page errors or private API calls.
 - Anonymous `/demo` returned HTTP 200; 11 private pages required sign-in and 15 protected API checks returned HTTP 401. Another protected preview returned HTTP 302. Only the final preview hostname received a new protection exception; the superseded font-test preview's exception was revoked.
 - No production deployment, Supabase/schema/RLS change, project-wide protection change, environment-file change, or unrelated packaging change was made. The existing automatic Git deployment `.output` mismatch remains a separate known issue.
+
+### Expanded public Command Center acceptance — 2026-09-19
+
+- `/demo` now foregrounds the complete synthetic Command Center. Namespaced demo routes also represent Operator v0.1, Executive Brief, Capture, Triage, All Entries, Workstreams, Workstream Detail, entry review/edit/delete, and Archive.
+- The demo reuses the accepted `buildCommandCenter`, `buildOperatorSnapshot`, `answerOperatorQuestion`, schemas, enums, and transition validators. A browser-local adapter replaces only authenticated persistence. Operator remains a read-only derived view and never mutates workspace state.
+- Workstream creation, editing, and deletion are local. Deleting a workstream preserves related entries, clears their assignment, resets them to Inbox, and clears resolved timestamps, matching the private invariant.
+- Lint, typecheck, production build, and all 35 unit/integration tests passed. The full Playwright suite passed 13 tests with one credential-dependent cross-device test skipped. The deployed public-demo suite passed all nine desktop/mobile flows with zero Supabase requests, zero protected API requests, and zero console/page errors while executing `/demo` routes.
+- The public preview returned HTTP 200 anonymously; 11 private pages required application sign-in, all 15 protected API checks returned HTTP 401 anonymously, and a protected control preview returned HTTP 302.
+- Weekly Review completion, authentication/account recovery, Supabase persistence, RLS, and real cross-device data remain intentionally private and are not simulated by the public demo.
 
 ## Validation
 
@@ -122,7 +132,7 @@ vercel deploy --prebuilt --archive=tgz
 
 The packaging command replaces only generated `.vercel/output` and copies no environment files. It serves `dist/client` through the filesystem route and the worker through a Node 24 function. Existing images use `unoptimized`; Cloudflare image-transformation bindings are not supplied by this adapter.
 
-The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current recruiter preview has an exact-hostname exception for `neverlost-executive-brief-ce7hc9koe-neverlost-ai1.vercel.app`. The previously accepted `phgw4u519` preview remains available as a recovery preview. Project-wide protection is unchanged. Each exception covers its hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
+The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current recruiter preview has an exact-hostname exception for `neverlost-executive-brief-4ppeovmvi-neverlost-ai1.vercel.app`. Project-wide protection remains `all_except_custom_domains`. The exception covers that hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
 
 ## Data and security
 

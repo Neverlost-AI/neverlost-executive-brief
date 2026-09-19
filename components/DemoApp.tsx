@@ -3,27 +3,33 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   categories,
   categoryLabel,
   entryInputSchema,
   priorities,
   type EntryInput,
+  type EntryUpdate,
 } from "@/lib/entries";
 import {
+  addDemoEntry,
+  blankDemoWorkspace,
   createDemoEntry,
   deleteDemoEntry,
   DEMO_STORAGE_KEY,
-  parseStoredDemoEntries,
-  seedDemoEntries,
+  newDemoId,
+  parseStoredDemoWorkspace,
+  seedDemoWorkspace,
   sortDemoEntries,
   updateDemoEntry,
   type DemoEntry,
+  type DemoWorkspace,
 } from "@/lib/demo-workspace";
+import { DemoCommandCenterView, DemoCommandFields, type DemoCommandView } from "@/components/DemoCommandCenterViews";
 
-type DemoView = "dashboard" | "capture" | "archive" | "detail";
-type Props = { view: DemoView; entryId?: string };
+type DemoView = DemoCommandView | "brief" | "capture" | "archive" | "detail";
+type Props = { view: DemoView; entryId?: string; workstreamId?: string };
 
 const emptyInput: EntryInput = {
   title: "",
@@ -32,42 +38,33 @@ const emptyInput: EntryInput = {
   priority: "normal",
 };
 
-function newId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `demo-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-export function DemoApp({ view, entryId }: Props) {
-  const [entries, setEntries] = useState<DemoEntry[]>(seedDemoEntries);
+export function DemoApp({ view, entryId, workstreamId }: Props) {
+  const [workspace, setWorkspace] = useState<DemoWorkspace>(seedDemoWorkspace);
   const [hydrated, setHydrated] = useState(false);
   const [workspaceMessage, setWorkspaceMessage] = useState("");
 
-  const persistEntries: React.Dispatch<React.SetStateAction<DemoEntry[]>> = useCallback((update) => {
-    setEntries((current) => {
-      const next = typeof update === "function" ? update(current) : update;
-      window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
   useEffect(() => {
-    const stored = parseStoredDemoEntries(window.localStorage.getItem(DEMO_STORAGE_KEY));
+    const stored = parseStoredDemoWorkspace(window.localStorage.getItem(DEMO_STORAGE_KEY));
     // Local storage hydration is intentionally isolated to the public demo.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (stored) setEntries(stored);
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setWorkspace(stored);
+    }
     setHydrated(true);
   }, []);
 
+  useEffect(() => {
+    if (hydrated) window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(workspace));
+  }, [hydrated, workspace]);
+
   function resetDemo() {
-    persistEntries(seedDemoEntries());
+    setWorkspace(seedDemoWorkspace());
     setWorkspaceMessage("Demo restored to its original synthetic workspace.");
   }
 
   function startBlank() {
     if (!window.confirm("Clear this synthetic demo workspace and start blank?")) return;
-    persistEntries([]);
+    setWorkspace(blankDemoWorkspace());
     setWorkspaceMessage("Demo workspace cleared. Add any fictional sample you would like to try.");
   }
 
@@ -80,11 +77,17 @@ export function DemoApp({ view, entryId }: Props) {
       </aside>
       {workspaceMessage && <p className="demo-workspace-message" role="status">{workspaceMessage}</p>}
       <main id="main-content" className="main-content">
-        {view === "dashboard" && <DemoDashboard entries={entries} />}
-        {view === "capture" && <DemoCapture ready={hydrated} setEntries={persistEntries} />}
-        {view === "archive" && <DemoArchive ready={hydrated} entries={entries} setEntries={persistEntries} />}
-        {view === "detail" && entryId && hydrated && (
-          <DemoEntryDetail ready={hydrated} entries={entries} setEntries={persistEntries} entryId={entryId} />
+        {(["command-dashboard", "operator", "triage", "entries", "workstreams", "workstream-detail"] as DemoCommandView[]).includes(view as DemoCommandView) && (
+          <DemoCommandCenterView view={view as DemoCommandView} workspace={workspace} setWorkspace={setWorkspace} ready={hydrated} workstreamId={workstreamId} />
+        )}
+        {view === "brief" && <DemoBrief entries={workspace.entries} />}
+        {view === "capture" && <DemoCapture ready={hydrated} setWorkspace={setWorkspace} />}
+        {view === "archive" && <DemoArchive ready={hydrated} workspace={workspace} setWorkspace={setWorkspace} />}
+        {view === "detail" && entryId && hydrated && workspace.entries.some((entry) => entry.id === entryId) && (
+          <DemoEntryDetail ready={hydrated} workspace={workspace} setWorkspace={setWorkspace} entryId={entryId} />
+        )}
+        {view === "detail" && entryId && hydrated && !workspace.entries.some((entry) => entry.id === entryId) && (
+          <EmptyState title="Demo entry not found." body="It may have been deleted or the demo may have been reset." href="/demo/brief" action="Return to demo brief" />
         )}
         {view === "detail" && !hydrated && <p className="message" role="status">Opening synthetic demo entry…</p>}
       </main>
@@ -106,10 +109,25 @@ function DemoHeader({
   onReset: () => void;
   onBlank: () => void;
 }) {
-  const activeHref = view === "capture" ? "/demo/capture" : view === "archive" ? "/demo/archive" : "/demo";
+  const activeHref = {
+    "command-dashboard": "/demo",
+    operator: "/demo/operator",
+    brief: "/demo/brief",
+    capture: "/demo/capture",
+    triage: "/demo/triage",
+    entries: "/demo/entries",
+    workstreams: "/demo/workstreams",
+    "workstream-detail": "/demo/workstreams",
+    archive: "/demo/archive",
+    detail: "/demo/entries",
+  }[view];
   const links = [
-    ["/demo", "Brief"],
+    ["/demo", "Command Center"],
+    ["/demo/operator", "Operator"],
+    ["/demo/brief", "Brief"],
     ["/demo/capture", "Capture"],
+    ["/demo/triage", "Triage"],
+    ["/demo/workstreams", "Workstreams"],
     ["/demo/archive", "Archive"],
   ] as const;
   return (
@@ -143,7 +161,7 @@ function DemoBrand() {
   );
 }
 
-function DemoDashboard({ entries }: { entries: DemoEntry[] }) {
+function DemoBrief({ entries }: { entries: DemoEntry[] }) {
   const active = useMemo(() => sortDemoEntries(entries.filter((entry) => !entry.archived_at)), [entries]);
   const unreviewed = active.filter((entry) => !entry.reviewed_at);
   const reviewed = active.filter((entry) => entry.reviewed_at);
@@ -152,7 +170,7 @@ function DemoDashboard({ entries }: { entries: DemoEntry[] }) {
       <PageHeading
         eyebrow="Recruiter portfolio demo"
         title="Executive Brief"
-        description="Explore a fictional workspace. Every change is local to this demo."
+        description="Review the preserved synthetic capture inbox. Every change is local to this browser."
         action={{ href: "/demo/capture", label: "Capture a demo item" }}
       />
       <div className="summary-grid" aria-label="Demo brief summary">
@@ -176,10 +194,10 @@ function DemoDashboard({ entries }: { entries: DemoEntry[] }) {
 
 function DemoCapture({
   ready,
-  setEntries,
+  setWorkspace,
 }: {
   ready: boolean;
-  setEntries: React.Dispatch<React.SetStateAction<DemoEntry[]>>;
+  setWorkspace: React.Dispatch<React.SetStateAction<DemoWorkspace>>;
 }) {
   const [form, setForm] = useState<EntryInput>(emptyInput);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -200,8 +218,8 @@ function DemoCapture({
       return;
     }
     const now = new Date().toISOString();
-    const created = createDemoEntry(parsed.data, newId(), now);
-    setEntries((current) => [created, ...current]);
+    const created = createDemoEntry(parsed.data, newDemoId(), now);
+    setWorkspace((current) => addDemoEntry(current, created));
     setForm(emptyInput);
     setErrors({});
     setCreatedId(created.id);
@@ -246,16 +264,16 @@ function DemoCapture({
 
 function DemoArchive({
   ready,
-  entries,
-  setEntries,
+  workspace,
+  setWorkspace,
 }: {
   ready: boolean;
-  entries: DemoEntry[];
-  setEntries: React.Dispatch<React.SetStateAction<DemoEntry[]>>;
+  workspace: DemoWorkspace;
+  setWorkspace: React.Dispatch<React.SetStateAction<DemoWorkspace>>;
 }) {
-  const archived = entries.filter((entry) => entry.archived_at).sort((a, b) => Date.parse(b.archived_at || "") - Date.parse(a.archived_at || ""));
+  const archived = workspace.entries.filter((entry) => entry.archived_at).sort((a, b) => Date.parse(b.archived_at || "") - Date.parse(a.archived_at || ""));
   function restore(entry: DemoEntry) {
-    setEntries((current) => updateDemoEntry(current, entry.id, { archived_at: null }, new Date().toISOString()));
+    setWorkspace((current) => updateDemoEntry(current, entry.id, { archived_at: null }, new Date().toISOString()));
   }
   return (
     <>
@@ -276,37 +294,49 @@ function DemoArchive({
 
 function DemoEntryDetail({
   ready,
-  entries,
-  setEntries,
+  workspace,
+  setWorkspace,
   entryId,
 }: {
   ready: boolean;
-  entries: DemoEntry[];
-  setEntries: React.Dispatch<React.SetStateAction<DemoEntry[]>>;
+  workspace: DemoWorkspace;
+  setWorkspace: React.Dispatch<React.SetStateAction<DemoWorkspace>>;
   entryId: string;
 }) {
   const router = useRouter();
-  const entry = entries.find((value) => value.id === entryId) || null;
+  const entry = workspace.entries.find((value) => value.id === entryId) || null;
   const [status, setStatus] = useState("");
+  const [editForm, setEditForm] = useState<EntryInput>(() => entry ? {
+    title: entry.title,
+    content: entry.content,
+    category: entry.category,
+    priority: entry.priority,
+  } : emptyInput);
 
   if (!entry) return <EmptyState title="Demo entry not found." body="It may have been deleted or the demo may have been reset." href="/demo" action="Return to demo brief" />;
 
-  function patch(update: Partial<DemoEntry>, message: string) {
-    setEntries((current) => updateDemoEntry(current, entryId, update, new Date().toISOString()));
-    setStatus(message);
+  function patch(update: EntryUpdate, message: string) {
+    try {
+      const now = new Date().toISOString();
+      updateDemoEntry(workspace, entryId, update, now);
+      setWorkspace((current) => updateDemoEntry(current, entryId, update, now));
+      setStatus(message);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Demo changes could not be saved.");
+    }
   }
 
   function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = entryInputSchema.safeParse(Object.fromEntries(new FormData(event.currentTarget)));
+    const parsed = entryInputSchema.safeParse(editForm);
     if (!parsed.success) { setStatus("Title, content, category, and priority must be valid."); return; }
     patch(parsed.data, "Demo changes saved locally.");
   }
 
   function remove() {
     if (!window.confirm("Delete this synthetic demo entry?")) return;
-    setEntries((current) => deleteDemoEntry(current, entryId));
-    router.push("/demo");
+    setWorkspace((current) => deleteDemoEntry(current, entryId));
+    router.push("/demo/brief");
   }
 
   return (
@@ -317,11 +347,11 @@ function DemoEntryDetail({
         description={`Synthetic record · Updated ${formatDate(entry.updated_at)}`}
       />
       <form className="panel form-panel" onSubmit={save}>
-        <Field label="Title" htmlFor="demo-detail-title"><input id="demo-detail-title" name="title" required maxLength={160} defaultValue={entry.title} disabled={!ready} /></Field>
-        <Field label="Content" htmlFor="demo-detail-content"><textarea id="demo-detail-content" name="content" required rows={12} maxLength={20_000} defaultValue={entry.content} disabled={!ready} /></Field>
+        <Field label="Title" htmlFor="demo-detail-title"><input id="demo-detail-title" name="title" required maxLength={160} value={editForm.title} disabled={!ready} onChange={(event) => setEditForm({ ...editForm, title: event.target.value })} /></Field>
+        <Field label="Content" htmlFor="demo-detail-content"><textarea id="demo-detail-content" name="content" required rows={12} maxLength={20_000} value={editForm.content} disabled={!ready} onChange={(event) => setEditForm({ ...editForm, content: event.target.value })} /></Field>
         <div className="form-grid">
-          <Field label="Category" htmlFor="demo-detail-category"><select id="demo-detail-category" name="category" defaultValue={entry.category} disabled={!ready}>{categories.map((category) => <option key={category} value={category}>{categoryLabel(category)}</option>)}</select></Field>
-          <Field label="Priority" htmlFor="demo-detail-priority"><select id="demo-detail-priority" name="priority" defaultValue={entry.priority} disabled={!ready}>{priorities.map((priority) => <option key={priority} value={priority}>{capitalize(priority)}</option>)}</select></Field>
+          <Field label="Category" htmlFor="demo-detail-category"><select id="demo-detail-category" name="category" value={editForm.category} disabled={!ready} onChange={(event) => setEditForm({ ...editForm, category: event.target.value as EntryInput["category"] })}>{categories.map((category) => <option key={category} value={category}>{categoryLabel(category)}</option>)}</select></Field>
+          <Field label="Priority" htmlFor="demo-detail-priority"><select id="demo-detail-priority" name="priority" value={editForm.priority} disabled={!ready} onChange={(event) => setEditForm({ ...editForm, priority: event.target.value as EntryInput["priority"] })}>{priorities.map((priority) => <option key={priority} value={priority}>{capitalize(priority)}</option>)}</select></Field>
         </div>
         {status && <p className="message" role="status">{status}</p>}
         <div className="form-actions">
@@ -331,6 +361,7 @@ function DemoEntryDetail({
           <button type="button" className="button button-danger" disabled={!ready} onClick={remove}>Delete demo entry</button>
         </div>
       </form>
+      <DemoCommandFields key={`${entry.id}-${entry.updated_at}`} entry={entry} workspace={workspace} setWorkspace={setWorkspace} ready={ready} />
     </>
   );
 }

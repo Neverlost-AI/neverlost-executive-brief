@@ -79,8 +79,18 @@
   }
 
   .demo-header nav {
+    flex-wrap: wrap;
     grid-column: 1 / -1;
     grid-row: 3;
+    max-width: none;
+    overflow-x: visible;
+    row-gap: 0.15rem;
+    width: 100%;
+  }
+
+  .demo-header nav a {
+    font-size: 0.8rem;
+    padding: 0.52rem 0.62rem;
   }
 
   .demo-header-actions {

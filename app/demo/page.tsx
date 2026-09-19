@@ -1,5 +1,5 @@
 import { DemoApp } from "@/components/DemoApp";
 
 export default function DemoPage() {
-  return <DemoApp view="dashboard" />;
+  return <DemoApp view="command-dashboard" />;
 }
