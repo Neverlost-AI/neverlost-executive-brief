@@ -57,12 +57,20 @@ Open the local URL printed by the development server.
 
 #### Public portfolio demo
 
-- Intended recruiter-facing URL: `/demo`
+- Public recruiter demo: https://neverlost-executive-brief-phgw4u519-neverlost-ai1.vercel.app/demo
 - No authentication or environment variables are required.
 - The seeded workspace contains fictional synthetic records only.
 - Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v1`.
 - `Reset demo` restores the original seed and `Start blank` clears only the local demo workspace.
 - The demo performs no Supabase reads or writes and is not production clinical software.
+
+### Public demo acceptance — 2026-09-18
+
+- Desktop demo lifecycle passed. Fresh mobile acceptance confirmed native delete and Start blank confirmations, persisted deletion/empty state, and usable empty-state controls at 390 × 844. No application-code fix was required.
+- Reset restored the original seven synthetic entries: six active and one archived. Demo changes remain local to each visitor's browser.
+- The public URL returned HTTP 200 anonymously; all 11 private page routes displayed the sign-in gate and all 15 protected API checks returned HTTP 401. Another protected preview still returned HTTP 302.
+- Lint, typecheck, production build, and 33 unit/integration tests passed. The existing Playwright suite passed 9 tests; its live-credential cross-device test was skipped, not counted as a pass. Validation ran from an isolated source copy without local environment files.
+- No production deployment, project-wide protection change, Supabase change, or packaging change was made for closeout.
 
 ## Validation
 
@@ -104,7 +112,7 @@ vercel deploy --prebuilt --archive=tgz
 
 The packaging command replaces only generated `.vercel/output` and copies no environment files. It serves `dist/client` through the filesystem route and the worker through a Node 24 function. Existing images use `unoptimized`; Cloudflare image-transformation bindings are not supplied by this adapter.
 
-The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current preview remains protected and requires an explicitly approved public hosting/protection configuration before sharing with recruiters.
+The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: an approved exception makes only `neverlost-executive-brief-phgw4u519-neverlost-ai1.vercel.app` publicly reachable. Project-wide protection is unchanged. The exception covers that hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
 
 ## Data and security
 
