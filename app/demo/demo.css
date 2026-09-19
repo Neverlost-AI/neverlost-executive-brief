@@ -33,7 +33,7 @@
 .demo-notice {
   align-items: center;
   background: var(--info-surface);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--blue-border-strong);
   color: var(--primary-dark);
   display: flex;
   gap: 1rem;
@@ -43,6 +43,7 @@
 }
 
 .demo-notice strong {
+  color: var(--primary);
   font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -55,7 +56,7 @@
 
 .demo-workspace-message {
   background: var(--info-surface);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--blue-border);
   color: var(--primary-dark);
   margin: 0;
   padding: 0.75rem 1rem;
