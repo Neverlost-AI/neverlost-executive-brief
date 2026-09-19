@@ -136,9 +136,9 @@ function DemoBrand() {
   return (
     <div className="brand">
       <span className="brand-mark">
-        <Image src="/brand/nvlt-primary.svg" width={42} height={42} alt="Neverlost logo" priority unoptimized />
+        <Image src="/brand/nvlt-official.png" width={42} height={42} alt="Neverlost logo" priority unoptimized />
       </span>
-      <div><strong>NVLT Command Center</strong><span>by Neverlost</span></div>
+      <div><strong>Neverlost</strong><span>Command Center</span></div>
     </div>
   );
 }

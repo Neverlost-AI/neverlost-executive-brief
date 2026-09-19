@@ -32,8 +32,9 @@
 
 .demo-notice {
   align-items: center;
-  background: var(--primary-dark);
-  color: var(--white);
+  background: var(--info-surface);
+  border-bottom: 1px solid var(--line);
+  color: var(--primary-dark);
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -48,12 +49,12 @@
 }
 
 .demo-notice span {
-  color: var(--surface);
+  color: var(--muted);
   font-size: 0.82rem;
 }
 
 .demo-workspace-message {
-  background: var(--surface);
+  background: var(--info-surface);
   border-bottom: 1px solid var(--line);
   color: var(--primary-dark);
   margin: 0;

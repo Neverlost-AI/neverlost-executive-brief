@@ -1,16 +1,27 @@
 @import "tailwindcss";
 
+/* Serve Inter from a stable public URL; avoid build-machine font paths. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+
 :root {
-  --ink: #1f2937;
-  --muted: #6b7280;
+  --ink: #122033;
+  --muted: #566678;
   --line: #d1d5db;
   --paper: #f3f4f6;
   --panel: #ffffff;
-  --primary: #374151;
-  --primary-dark: #1f2937;
+  --primary: #1f66d8;
+  --primary-dark: #102844;
+  --interactive-hover: #1854b5;
+  --info-surface: #eaf2f8;
   --surface: #f3f4f6;
   --white: #ffffff;
-  --shadow: 0 18px 45px rgba(31, 41, 55, 0.1);
+  --shadow: 0 2px 8px rgba(18, 32, 51, 0.04);
 }
 
 * {
@@ -24,11 +35,10 @@ html {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(209, 213, 219, 0.62), transparent 34rem),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, Arial, sans-serif;
+  line-height: 1.5;
   min-height: 100vh;
 }
 
@@ -73,7 +83,7 @@ a {
 
 .app-header {
   align-items: center;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--white);
   border-bottom: 1px solid var(--line);
   display: grid;
   gap: 1.5rem;
@@ -97,6 +107,7 @@ a {
   height: 42px;
   justify-content: center;
   width: 42px;
+  flex-shrink: 0;
 }
 
 .brand-mark img {
@@ -128,7 +139,7 @@ a {
 }
 
 .app-header nav a {
-  border-radius: 999px;
+  border-radius: 8px;
   font-size: 0.92rem;
   font-weight: 700;
   padding: 0.65rem 0.9rem;
@@ -136,12 +147,14 @@ a {
 }
 
 .app-header nav a:hover {
-  background: var(--surface);
+  background: var(--info-surface);
+  color: var(--primary);
 }
 
 .app-header nav a[aria-current="page"] {
-  background: var(--primary);
-  color: var(--white);
+  background: var(--info-surface);
+  color: var(--primary);
+  box-shadow: inset 0 -2px var(--primary);
 }
 
 .account {
@@ -177,9 +190,9 @@ a {
 
 .eyebrow {
   color: var(--primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   margin-bottom: 0.75rem;
   text-transform: uppercase;
 }
@@ -194,15 +207,16 @@ p {
 h1,
 h2,
 h3 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: inherit;
+  font-weight: 600;
 }
 
 .page-heading h1,
 .auth-intro h1,
 .setup-card h1 {
-  font-size: clamp(2.35rem, 6vw, 4.4rem);
-  letter-spacing: -0.045em;
-  line-height: 0.98;
+  font-size: 1.875rem;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
   margin-bottom: 1rem;
 }
 
@@ -218,7 +232,7 @@ h3 {
   border-radius: 10px;
   cursor: pointer;
   display: inline-flex;
-  font-weight: 750;
+  font-weight: 600;
   justify-content: center;
   min-height: 44px;
   padding: 0.72rem 1rem;
@@ -236,7 +250,7 @@ h3 {
 }
 
 .button-primary:hover {
-  background: var(--primary-dark);
+  background: var(--interactive-hover);
 }
 
 .button-secondary {
@@ -280,7 +294,8 @@ h3 {
 }
 
 .summary-card strong {
-  font-family: Georgia, serif;
+  font-family: inherit;
+  font-weight: 600;
   font-size: 2.2rem;
 }
 
@@ -293,7 +308,7 @@ h3 {
 }
 
 .summary-slate {
-  background: var(--line);
+  background: var(--white);
 }
 
 .entry-section {
@@ -310,7 +325,7 @@ h3 {
 }
 
 .section-heading h2 {
-  font-size: 1.55rem;
+  font-size: 1.375rem;
   margin: 0;
 }
 
@@ -337,8 +352,8 @@ h3 {
   background: var(--panel);
   border: 1px solid var(--line);
   border-left: 4px solid var(--muted);
-  border-radius: 14px;
-  box-shadow: 0 5px 20px rgba(31, 41, 55, 0.05);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
   padding: 1.35rem;
 }
 
@@ -377,8 +392,8 @@ h3 {
 
 .entry-card h2,
 .entry-card h3 {
-  font-size: 1.45rem;
-  line-height: 1.18;
+  font-size: 1.125rem;
+  line-height: 1.4;
   margin-bottom: 0.7rem;
 }
 
@@ -387,11 +402,12 @@ h3 {
 }
 
 .entry-card h3 a:hover {
+  color: var(--primary);
   text-decoration: underline;
 }
 
 .entry-card p {
-  color: var(--primary);
+  color: var(--muted);
   line-height: 1.55;
   min-height: 3.1rem;
 }
@@ -400,7 +416,7 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 999px;
-  color: var(--primary);
+  color: var(--ink);
   display: inline-block;
   font-size: 0.67rem;
   font-weight: 800;
@@ -425,7 +441,7 @@ h3 {
 }
 
 .text-link {
-  color: var(--primary-dark);
+  color: var(--primary);
   font-weight: 800;
   text-decoration: none;
 }
@@ -446,7 +462,7 @@ h3 {
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 12px;
   box-shadow: var(--shadow);
 }
 
@@ -515,7 +531,7 @@ h3 {
 }
 
 .message-success {
-  background: var(--surface);
+  background: var(--info-surface);
   color: var(--primary-dark);
 }
 
@@ -651,7 +667,7 @@ h3 {
 }
 
 .setup-card h1 {
-  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-size: 1.875rem;
 }
 
 .setup-card p {
@@ -835,6 +851,11 @@ h3 {
 
 .command-row:last-child {
   border-bottom: 0;
+}
+
+.command-row:hover {
+  background: var(--info-surface);
+  color: var(--primary);
 }
 
 .command-row > span:first-child {
@@ -1103,8 +1124,8 @@ h3 {
 }
 
 .operator-answer {
-  background: var(--surface);
-  border-left: 4px solid var(--primary-dark);
+  background: var(--info-surface);
+  border-left: 4px solid var(--primary);
   border-radius: 10px;
   color: var(--ink) !important;
   line-height: 1.55;

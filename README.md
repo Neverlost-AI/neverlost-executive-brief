@@ -57,7 +57,7 @@ Open the local URL printed by the development server.
 
 #### Public portfolio demo
 
-- Public recruiter demo: https://neverlost-executive-brief-phgw4u519-neverlost-ai1.vercel.app/demo
+- Public recruiter demo: https://neverlost-executive-brief-ce7hc9koe-neverlost-ai1.vercel.app/demo
 - No authentication or environment variables are required.
 - The seeded workspace contains fictional synthetic records only.
 - Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v1`.
@@ -71,6 +71,16 @@ Open the local URL printed by the development server.
 - The public URL returned HTTP 200 anonymously; all 11 private page routes displayed the sign-in gate and all 15 protected API checks returned HTTP 401. Another protected preview still returned HTTP 302.
 - Lint, typecheck, production build, and 33 unit/integration tests passed. The existing Playwright suite passed 9 tests; its live-credential cross-device test was skipped, not counted as a pass. Validation ran from an isolated source copy without local environment files.
 - No production deployment, project-wide protection change, Supabase change, or packaging change was made for closeout.
+
+### Visual-system v1 acceptance — 2026-09-19
+
+- Accepted functional baseline `112bd62a918e80d3230b4a17100813494531c65c` was pushed unchanged before the visual pass.
+- Branding follows the supplied Brand Overview Card: Inter typography, navy/ink text, restrained blue interactions, and neutral gray workspace surfaces. The canonical `NVLT Offical Logo (1).png` is preserved byte-for-byte as `public/brand/nvlt-official.png`. Existing layouts and workflows are unchanged.
+- Inter is served locally with its OFL license. This corrects a deployed Vinext font-loader issue that emitted Windows file URLs; no build packaging or application behavior was changed.
+- `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test` (33 passed), `npm.cmd run build`, and `npm.cmd run test:e2e` (9 passed, 1 live-credential test skipped) passed from an isolated source copy without local environment files.
+- The final preview passed desktop and mobile loading/layout, edit/reload, review, archive, confirmed delete, Reset demo, and confirmed Start blank/reload. Both test contexts were restored to six active plus one archived synthetic entry. Inter loaded successfully, with no demo console/page errors or private API calls.
+- Anonymous `/demo` returned HTTP 200; 11 private pages required sign-in and 15 protected API checks returned HTTP 401. Another protected preview returned HTTP 302. Only the final preview hostname received a new protection exception; the superseded font-test preview's exception was revoked.
+- No production deployment, Supabase/schema/RLS change, project-wide protection change, environment-file change, or unrelated packaging change was made. The existing automatic Git deployment `.output` mismatch remains a separate known issue.
 
 ## Validation
 
@@ -112,7 +122,7 @@ vercel deploy --prebuilt --archive=tgz
 
 The packaging command replaces only generated `.vercel/output` and copies no environment files. It serves `dist/client` through the filesystem route and the worker through a Node 24 function. Existing images use `unoptimized`; Cloudflare image-transformation bindings are not supplied by this adapter.
 
-The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: an approved exception makes only `neverlost-executive-brief-phgw4u519-neverlost-ai1.vercel.app` publicly reachable. Project-wide protection is unchanged. The exception covers that hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
+The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current recruiter preview has an exact-hostname exception for `neverlost-executive-brief-ce7hc9koe-neverlost-ai1.vercel.app`. The previously accepted `phgw4u519` preview remains available as a recovery preview. Project-wide protection is unchanged. Each exception covers its hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
 
 ## Data and security
 

@@ -946,17 +946,17 @@ function Brand() {
     <div className="brand">
       <span className="brand-mark">
         <Image
-          src="/brand/nvlt-primary.svg"
+          src="/brand/nvlt-official.png"
           width={42}
           height={42}
-          alt="NVLT logo"
+          alt="Neverlost logo"
           priority
           unoptimized
         />
       </span>
       <div>
-        <strong>NVLT Command Center</strong>
-        <span>by Neverlost</span>
+        <strong>Neverlost</strong>
+        <span>Command Center</span>
       </div>
     </div>
   );
