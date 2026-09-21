@@ -1,128 +1,163 @@
-# Neverlost Executive Brief
+# Neverlost Command Center
+
+A working continuity and coordination app for capturing important information, organizing it into workstreams, tracking blockers and next actions, and carrying context forward instead of rebuilding it each time.
+
+The repository contains two intentionally separate experiences:
+
+- **Public portfolio demo** — a fully synthetic, browser-local Command Center that recruiters and collaborators can explore without an account.
+- **Private authenticated application** — a Supabase-backed cross-device workspace with account-scoped persistence and Row Level Security.
+
+The public demo includes:
+
+- Command Center dashboard
+- capture
+- triage
+- workstreams and workstream detail
+- entry review, edit, archive, restore, and delete
+- Executive Brief
+- deterministic, read-only Operator views
+
+The demo uses fictional data only and does not read or write the private Supabase application.
+
+**Live Demo:** [https://neverlost-executive-brief.vercel.app/demo](https://neverlost-executive-brief.vercel.app/demo)
+
+**Repository:** [https://github.com/Neverlost-AI/neverlost-executive-brief](https://github.com/Neverlost-AI/neverlost-executive-brief)
 
 Status: `PHASE_2A_MANUAL_COMMAND_CENTER_HUMAN_ACCEPTED`
 
-A private, manual cross-device continuity inbox and owner-controlled Command Center. Phase 1 capture remains preserved while Phase 2A adds manual triage, workstreams, command states, deterministic dashboard views, and weekly review.
+## Architecture
 
-The repository also includes a public recruiter-facing portfolio demo at `/demo`. The demo is an isolated client-side workspace with synthetic data; it does not authenticate, read or write Supabase, or call the authenticated entry APIs.
+Neverlost preserves capture before classification, then adds explicit owner-controlled structure around the captured material.
 
-There is no AI, automatic summarization, prioritization, external integration, monitoring, scheduler, or background action.
+- Phase 1 provides the authenticated continuity inbox and Executive Brief.
+- Phase 2A adds manual triage, workstreams, command states, deterministic dashboard sections, and weekly review.
+- The public `/demo` routes reuse the accepted schemas, transition validators, `buildCommandCenter`, `buildOperatorSnapshot`, and `answerOperatorQuestion` logic through a browser-local persistence adapter.
+- The private application uses authenticated API routes and Supabase persistence; the public demo never calls those routes.
+- Operator is a deterministic, read-only attention layer. It can explain current state and propose next actions, but it cannot write, approve, send, or execute consequential actions.
+- Executive Brief remains available as one view inside the broader Command Center.
+
+There are no model calls, automatic prioritization, background agents, schedulers, external integrations, or autonomous actions in this version.
 
 ## Stack
 
-- Next.js-compatible Vinext App Router, TypeScript, and React
+- Next.js-compatible Vinext App Router
+- TypeScript and React
 - Supabase PostgreSQL and Authentication
 - Supabase Row Level Security
 - Zod validation
 - Vitest and Playwright
+- Inter typography with local font assets
 
-The site starter uses Vinext to produce the Cloudflare Worker-compatible build required by OpenAI Sites while retaining the Next.js App Router programming model.
+Vinext retains the Next.js App Router programming model while producing a Cloudflare-compatible `dist/client` and `dist/server` worker build.
 
-## Prerequisites
+## Public Demo
+
+The public experience is namespaced entirely under `/demo`:
+
+- `/demo` — Command Center dashboard
+- `/demo/operator` — deterministic Operator
+- `/demo/brief` — Executive Brief
+- `/demo/capture` — synthetic capture
+- `/demo/triage` — manual triage
+- `/demo/entries` and `/demo/entries/:id` — entry review and editing
+- `/demo/workstreams` and `/demo/workstreams/:id` — workstream management
+- `/demo/archive` — archived synthetic entries
+
+The seeded workspace contains eight fictional entries and three fictional workstreams spanning Inbox, Active, Waiting, Blocked, Resolved, risk, stale-review, next-action, and decision states.
+
+- State stays in namespaced browser local storage under `neverlost:portfolio-demo:v2`.
+- The accepted v1 key is not read or rewritten.
+- Deterministic stale and overdue behavior uses the fixed synthetic reference time September 19, 2026.
+- `Reset demo` restores the full synthetic workspace.
+- `Start blank` clears only the visitor's local demo workspace.
+- Workstream deletion preserves related entries and returns them to a valid unassigned Inbox state.
+- Demo execution makes zero Supabase requests and zero protected/private API requests.
+
+This is a portfolio illustration using synthetic data. It is not clinical software, production healthcare software, or a claim of commercial readiness.
+
+## Private Application
+
+Routes outside `/demo` belong to the authenticated application.
+
+- Supabase email/password authentication gates the workspace.
+- Entries and workstreams persist across devices.
+- Data is scoped to the authenticated account.
+- Weekly Review and account recovery remain private.
+- Operational pages require application sign-in even when the public production domain is reachable.
+- Protected API methods reject anonymous requests.
+
+### Prerequisites
 
 - Node.js 22.13 or newer
-- pnpm
+- pnpm or npm
 - A Supabase project
 - One dedicated test user; two users for the ownership acceptance test
 
-## Supabase setup
+### Supabase setup
 
 1. Create a Supabase project.
-2. Open the SQL editor and run:
-   `supabase/migrations/202607240001_create_entries.sql`
-3. Create a dedicated email/password test user.
-4. Copy `.env.example` to `.env.local`.
-5. Set `NEXT_PUBLIC_SUPABASE_URL` and
-   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-6. For Playwright, set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD`.
+2. Apply `supabase/migrations/202607240001_create_entries.sql`.
+3. Apply `supabase/migrations/202607260001_phase_2a_command_center.sql`.
+4. Create a dedicated email/password test user.
+5. Copy `.env.example` to `.env.local`.
+6. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+7. For live Playwright acceptance, set `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD`.
 
-Never add a service-role key. The public anon key is intentionally restricted by RLS.
+Never add a service-role key. The public publishable/anon key is intentionally restricted by Row Level Security.
 
-## Local development
+## Security & Data Boundaries
+
+- All persisted rows are owned by `user_id`, which references `auth.users`.
+- The application server derives ownership from a verified access token.
+- Row Level Security independently restricts select, insert, update, and delete.
+- Client input and API payloads are validated with Zod.
+- Database checks restrict lengths, enums, and accepted state values.
+- Entry content is not intentionally logged.
+- Permanent deletion requires confirmation.
+- Public demo data is embedded fictional seed data and cannot access private account state.
+- Public demo links remain under `/demo`; private links are never substituted into the demo navigation.
+
+See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
+
+## Local Development
 
 ```text
 pnpm install
 pnpm dev
 ```
 
-Open the local URL printed by the development server.
+Open the local URL printed by the development server. `/demo` works without Supabase environment variables; authenticated routes require the two public Supabase configuration values described above.
 
-### Application modes
-
-#### Private authenticated mode
-
-- Routes outside `/demo` use Supabase email/password authentication.
-- Data is scoped to the authenticated account and protected by Row Level Security.
-- Entries and workstreams persist across devices through the existing authenticated API routes.
-
-#### Public portfolio demo
-
-- Public recruiter demo: https://neverlost-executive-brief-4ppeovmvi-neverlost-ai1.vercel.app/demo
-- No authentication or environment variables are required.
-- The seeded workspace contains eight fictional entries and three fictional workstreams spanning Inbox, Active, Waiting, Blocked, Resolved, risk, stale-review, next-action, and decision states.
-- Demo mutations stay in namespaced browser local storage under `neverlost:portfolio-demo:v2`. The accepted v1 key is not read or rewritten.
-- Deterministic stale and overdue behavior uses the fixed synthetic reference time September 19, 2026, so the portfolio remains stable as calendar time passes.
-- `Reset demo` restores the complete synthetic Command Center workspace and `Start blank` clears only the local demo workspace.
-- The demo performs no Supabase reads or writes and is not production clinical software.
-
-### Public demo acceptance — 2026-09-18
-
-- Desktop demo lifecycle passed. Fresh mobile acceptance confirmed native delete and Start blank confirmations, persisted deletion/empty state, and usable empty-state controls at 390 × 844. No application-code fix was required.
-- Reset restored the original seven synthetic entries: six active and one archived. Demo changes remain local to each visitor's browser.
-- The public URL returned HTTP 200 anonymously; all 11 private page routes displayed the sign-in gate and all 15 protected API checks returned HTTP 401. Another protected preview still returned HTTP 302.
-- Lint, typecheck, production build, and 33 unit/integration tests passed. The existing Playwright suite passed 9 tests; its live-credential cross-device test was skipped, not counted as a pass. Validation ran from an isolated source copy without local environment files.
-- No production deployment, project-wide protection change, Supabase change, or packaging change was made for closeout.
-
-### Visual-system v1 acceptance — 2026-09-19
-
-- Accepted functional baseline `112bd62a918e80d3230b4a17100813494531c65c` was pushed unchanged before the visual pass.
-- Branding follows the supplied Brand Overview Card: Inter typography, navy/ink text, restrained blue interactions, and neutral gray workspace surfaces. The canonical `NVLT Offical Logo (1).png` is preserved byte-for-byte as `public/brand/nvlt-official.png`. Existing layouts and workflows are unchanged.
-- Inter is served locally with its OFL license. This corrects a deployed Vinext font-loader issue that emitted Windows file URLs; no build packaging or application behavior was changed.
-- `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test` (33 passed), `npm.cmd run build`, and `npm.cmd run test:e2e` (9 passed, 1 live-credential test skipped) passed from an isolated source copy without local environment files.
-- The final preview passed desktop and mobile loading/layout, edit/reload, review, archive, confirmed delete, Reset demo, and confirmed Start blank/reload. Both test contexts were restored to six active plus one archived synthetic entry. Inter loaded successfully, with no demo console/page errors or private API calls.
-- Anonymous `/demo` returned HTTP 200; 11 private pages required sign-in and 15 protected API checks returned HTTP 401. Another protected preview returned HTTP 302. Only the final preview hostname received a new protection exception; the superseded font-test preview's exception was revoked.
-- No production deployment, Supabase/schema/RLS change, project-wide protection change, environment-file change, or unrelated packaging change was made. The existing automatic Git deployment `.output` mismatch remains a separate known issue.
-
-### Expanded public Command Center acceptance — 2026-09-19
-
-- `/demo` now foregrounds the complete synthetic Command Center. Namespaced demo routes also represent Operator v0.1, Executive Brief, Capture, Triage, All Entries, Workstreams, Workstream Detail, entry review/edit/delete, and Archive.
-- The demo reuses the accepted `buildCommandCenter`, `buildOperatorSnapshot`, `answerOperatorQuestion`, schemas, enums, and transition validators. A browser-local adapter replaces only authenticated persistence. Operator remains a read-only derived view and never mutates workspace state.
-- Workstream creation, editing, and deletion are local. Deleting a workstream preserves related entries, clears their assignment, resets them to Inbox, and clears resolved timestamps, matching the private invariant.
-- Lint, typecheck, production build, and all 35 unit/integration tests passed. The full Playwright suite passed 13 tests with one credential-dependent cross-device test skipped. The deployed public-demo suite passed all nine desktop/mobile flows with zero Supabase requests, zero protected API requests, and zero console/page errors while executing `/demo` routes.
-- The public preview returned HTTP 200 anonymously; 11 private pages required application sign-in, all 15 protected API checks returned HTTP 401 anonymously, and a protected control preview returned HTTP 302.
-- Weekly Review completion, authentication/account recovery, Supabase persistence, RLS, and real cross-device data remain intentionally private and are not simulated by the public demo.
-
-## Validation
+## Validation & Testing
 
 ```text
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm build
-pnpm test:acceptance
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run test:e2e
 ```
 
-The acceptance test skips when dedicated Supabase test credentials are absent. A skip is not an acceptance pass.
+The accepted expanded public-demo baseline has:
 
-To run the database ownership test, execute `supabase/tests/entries_rls.sql` against a disposable local Supabase database after applying the migration. It rolls its data back.
+- 35 passing unit/integration tests
+- 13 passing Playwright tests
+- 1 credential-dependent live Supabase cross-device test skipped when dedicated credentials are absent
+- 9 public-demo Playwright flows covering desktop, 390px mobile, local mutations, deterministic Operator behavior, private-route gating, zero Supabase/private-API traffic, and browser console/page errors
+
+A skipped live-credential test is reported as skipped, not counted as an acceptance pass.
+
+To run the database ownership test, execute `supabase/tests/entries_rls.sql` against a disposable local Supabase database after applying the migrations. It rolls its data back.
 
 ## Deployment
 
-1. Apply the migration to the target Supabase project.
-2. Configure `NEXT_PUBLIC_SUPABASE_URL` and
-   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as hosted runtime variables.
-3. Build the validated source.
-4. Deploy privately for review.
-5. Run `MANUAL_ACCEPTANCE_CHECKLIST.md` against the deployed URL.
-6. Verify that `/demo` renders without Supabase environment variables before sharing that public demo URL.
+The current public portfolio URL is:
 
-Only the isolated synthetic `/demo` experience is intended for public portfolio viewing. Do not expose private account credentials or weaken authentication/RLS for the authenticated routes.
+[https://neverlost-executive-brief.vercel.app/demo](https://neverlost-executive-brief.vercel.app/demo)
 
-### Vercel/Vinext deployment note
+The repository includes `build/vercel-handler.mjs`, a small adapter from Vercel's Node request/response contract to the compiled Vinext worker. It preserves streaming, request bodies, and response cookies without changing application routing or authentication.
 
-The linked Vercel project currently uses the `Other` framework preset with `npm run build` and an `.output` output directory. This Vinext application instead emits a Cloudflare-compatible `dist/client` plus `dist/server` worker, so Git-based Vercel builds cannot deploy it by merely changing the output directory. `dist/client` is not a standalone application, and the repository must not manufacture a placeholder `.output` directory.
-
-The repository includes a small deployment adapter in `build/vercel-handler.mjs` that translates Vercel's Node request/response contract to the compiled Vinext worker. It preserves streaming, request bodies, and response cookies. It does not change application routing or authentication. Package and deploy a preview with:
+Package a validated build with:
 
 ```text
 npm run build
@@ -130,32 +165,54 @@ node build/package-vercel.mjs
 vercel deploy --prebuilt --archive=tgz
 ```
 
-The packaging command replaces only generated `.vercel/output` and copies no environment files. It serves `dist/client` through the filesystem route and the worker through a Node 24 function. Existing images use `unoptimized`; Cloudflare image-transformation bindings are not supplied by this adapter.
+The packaging command replaces only generated `.vercel/output`, copies no environment files, serves `dist/client` through the filesystem route, and serves the worker through a Node 24 function.
 
-The public `/demo` route itself requires no Supabase environment variables; the preserved private routes still require the two Supabase variables above. Automatic Git deployment retains the known `.output` mismatch and should remain disabled until its configuration is separately updated. Vercel Deployment Protection is independent of application authentication: the current recruiter preview has an exact-hostname exception for `neverlost-executive-brief-4ppeovmvi-neverlost-ai1.vercel.app`. Project-wide protection remains `all_except_custom_domains`. The exception covers that hostname, not only `/demo`; operational/private pages still require application sign-in and protected APIs reject anonymous requests. This is a non-production, synthetic portfolio demo.
+The Vercel project uses the `Other` framework preset. Automatic Git deployment retains a known mismatch because the Vinext build does not directly emit the configured `.output` directory; the documented prebuilt workflow is the accepted deployment path.
 
-## Data and security
+Vercel Deployment Protection and application authentication are separate boundaries. The stable production domain is public for the portfolio demo, while private pages still enforce Supabase sign-in and protected APIs reject anonymous requests. Generated preview/deployment URLs remain protected under the project's Vercel protection configuration.
 
-- All rows are owned by `user_id`, which references `auth.users`.
-- The application server derives ownership from the verified access token.
-- RLS independently restricts select, insert, update, and delete.
-- Client input and API payloads are validated with Zod.
-- Database checks restrict lengths, category, and priority.
-- Entry content is not intentionally logged.
-- Permanent deletion requires confirmation.
+## Known Limitations
 
-See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
-
-## Known limitations
-
-- Supabase project settings and a real test account are required for authentication and cross-device acceptance.
+- Supabase project settings and a real test account are required for authenticated cross-device acceptance.
 - Password recovery, MFA, rate-limit tuning, backups, retention, and incident response are configured in Supabase rather than this MVP.
 - Delete is permanent and has no in-product recovery.
 - Offline capture, notifications, native apps, collaboration, sharing, organizations, and integrations are not included.
-- Phase 1 and Phase 2A human acceptance passed using protected private previews. Phase 2A has one non-blocking UX note: an empty workstream selector should explicitly say that no workstreams exist and direct the user to create one. No production deployment is authorized, the app is not production-ready, and public launch or commercial readiness is not approved.
-- The public demo is a portfolio illustration with browser-local synthetic data. It does not claim clinical, production, or commercial readiness.
+- Weekly Review completion, authentication/account recovery, Supabase persistence, RLS, and real cross-device data are intentionally absent from the public representation.
+- Phase 2A retains one non-blocking UX note: an empty workstream selector should explicitly say that no workstreams exist and direct the user to create one.
+- The authenticated application has passed bounded human acceptance but is not presented as production healthcare or commercially ready software.
 
-## Project documents
+## Project History / Acceptance Records
+
+### Phase 1 and Phase 2A
+
+- Phase 1 established the manual cross-device continuity inbox, authenticated ownership, and Executive Brief.
+- Phase 2A added the owner-controlled Command Center without changing Phase 1 values or weakening Row Level Security.
+- The accepted Operator v0.1 checkpoint confirms that the Command Center can determine what deserves attention, explain why, and propose the next action without taking consequential action on its own.
+
+### Public recruiter demo — 2026-09-18
+
+- The first isolated public demo used seven synthetic entries: six active and one archived.
+- Desktop and 390 × 844 mobile edit, review, archive, delete, Reset demo, and Start blank flows passed.
+- At that acceptance point, lint, typecheck, production build, 33 unit/integration tests, and 9 Playwright tests passed; one live-credential test was skipped.
+- No Supabase, schema, RLS, authentication-data, or private-application behavior changed.
+
+### Visual-system v1 — 2026-09-19
+
+- Inter typography, navy/ink text, restrained blue interactions, and neutral gray workspace surfaces were applied without changing workflows.
+- The canonical NVLT logo is preserved as `public/brand/nvlt-official.png`.
+- Inter is served locally with its OFL license.
+- Desktop and mobile demo flows passed with no demo console/page errors or private API calls.
+
+### Expanded public Command Center — 2026-09-19
+
+- `/demo` became the Command Center landing view and Executive Brief moved to `/demo/brief`.
+- The public representation expanded to eight synthetic entries, three workstreams, complete Command Center sections, entry/workstream flows, and deterministic Operator views.
+- All 35 unit/integration tests passed. The full Playwright suite passed 13 tests with one credential-dependent test skipped.
+- Weekly Review completion, authentication, account recovery, Supabase persistence, RLS, and real cross-device data remain intentionally private.
+
+Historical acceptance documents remain unchanged in the repository.
+
+### Project documents
 
 - `PRODUCT_SPECIFICATION.md`
 - `SCOPE_AND_BOUNDARIES.md`
@@ -169,7 +226,9 @@ See `PRIVACY_AND_SECURITY_MODEL.md`, `SECURITY_REVIEW.md`, and `DATA_MODEL.md`.
 - `PHASE_1_MANUAL_CROSS_DEVICE_MVP_BUILD_REPORT.md`
 - `PHASE_2A_MANUAL_COMMAND_CENTER_IMPLEMENTATION_REPORT.md`
 - `PHASE_2A_ACCEPTANCE_CHECKPOINT.md`
+- `OPERATOR_V0_1_ACCEPTANCE_CHECKPOINT.md`
+- `OPERATOR_V0_1_IMPLEMENTATION_NOTES.md`
 
-## License and ownership
+## License and Ownership
 
-Private review project. No public-release or production status is implied.
+Public portfolio repository. No clinical, public-release, or commercial-production status is implied.
