@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ||
     (host.startsWith("localhost") ? "http" : "https");
   void protocol;
-  const title = "NVLT Command Center · by Neverlost";
+  const title = "Neverlost Command Center";
   const description =
     "A private, manual command center for cross-device continuity, triage, workstreams, and deliberate review.";
 

@@ -123,7 +123,7 @@ export function ExecutiveBriefApp({ view, entryId, workstreamId }: Props) {
         ) : null}
       </main>
       <footer className="app-footer">
-        NVLT Command Center · by Neverlost · Review-only manual MVP
+        Neverlost Command Center · Review-only manual MVP
       </footer>
     </div>
   );
@@ -951,14 +951,14 @@ function Brand() {
           src="/brand/nvlt-primary.svg"
           width={42}
           height={42}
-          alt="NVLT logo"
+          alt="Neverlost logo"
           priority
           unoptimized
         />
       </span>
       <div>
-        <strong>NVLT Command Center</strong>
-        <span>by Neverlost</span>
+        <strong>NEVERLOST</strong>
+        <span>Command Center</span>
       </div>
     </div>
   );
